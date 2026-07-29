@@ -1,0 +1,77 @@
+{
+  "name": "Research Agent v2 — Clean Structured Data (Inside the AI)",
+  "nodes": [
+    {
+      "parameters": { "rule": { "interval": [ { "field": "days", "triggerAtHour": 7 } ] } },
+      "id": "schedule",
+      "name": "Every morning 7am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [180, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://news.google.com/rss/search?q=artificial+intelligence+when:1d&hl=en-US&gl=US&ceid=US:en",
+        "options": {}
+      },
+      "id": "rss-read",
+      "name": "Read AI News (RSS)",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [380, 300],
+      "notes": "Free, no key. Add more RSS Read nodes for more sources; wire each into Remove Duplicates."
+    },
+    {
+      "parameters": {
+        "compare": "selectedFields",
+        "fieldsToCompare": { "fields": [ { "fieldName": "title" } ] },
+        "options": {}
+      },
+      "id": "dedup",
+      "name": "Remove Duplicates",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 1.1,
+      "position": [580, 300],
+      "notes": "Same story from multiple feeds -> keep one. Compares by title."
+    },
+    {
+      "parameters": { "aggregate": "aggregateAllItemData", "options": {} },
+      "id": "aggregate",
+      "name": "Combine Stories",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [780, 300]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Score and structure today's AI stories.\n\nStories:\n{{ JSON.stringify($json.data) }}\n\nReturn a JSON array. For each story include exactly these fields:\n- \"title\": the headline\n- \"source\": the outlet\n- \"score\": integer 1-10 (weigh recency, real-world impact, and hot-take potential)\n- \"why\": one sentence on why it scored that\n\nReturn ONLY the JSON array, sorted by score descending. No prose, no markdown fences.",
+        "options": {
+          "systemMessage": "You are the research producer for The Data Doc. You output clean, structured JSON only. Practical, contrarian, no hype."
+        }
+      },
+      "id": "score-agent",
+      "name": "Score & Structure Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [980, 300]
+    },
+    {
+      "parameters": { "modelName": "models/gemini-1.5-flash" },
+      "id": "chat-model",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [940, 520],
+      "notes": "Add your free Gemini credential here."
+    }
+  ],
+  "connections": {
+    "Every morning 7am": { "main": [[{ "node": "Read AI News (RSS)", "type": "main", "index": 0 }]] },
+    "Read AI News (RSS)": { "main": [[{ "node": "Remove Duplicates", "type": "main", "index": 0 }]] },
+    "Remove Duplicates": { "main": [[{ "node": "Combine Stories", "type": "main", "index": 0 }]] },
+    "Combine Stories": { "main": [[{ "node": "Score & Structure Agent", "type": "main", "index": 0 }]] },
+    "Google Gemini Chat Model": { "ai_languageModel": [[{ "node": "Score & Structure Agent", "type": "ai_languageModel", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }
+}

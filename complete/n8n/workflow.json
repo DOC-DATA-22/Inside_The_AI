@@ -1,0 +1,82 @@
+{
+  "name": "Research Agent v3 — Webhook for Chat UI (Inside the AI)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "research-agent",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Chat UI Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [220, 300],
+      "notes": "The chat app POSTs the user's message here. Copy this node's Production URL into the UI's .env."
+    },
+    {
+      "parameters": {
+        "url": "https://news.google.com/rss/search?q=artificial+intelligence+when:1d&hl=en-US&gl=US&ceid=US:en",
+        "options": {}
+      },
+      "id": "rss-read",
+      "name": "Read AI News (RSS)",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [430, 300]
+    },
+    {
+      "parameters": { "aggregate": "aggregateAllItemData", "options": {} },
+      "id": "aggregate",
+      "name": "Combine Stories",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=The user asked: {{ $('Chat UI Webhook').item.json.body.message }}\n\nToday's AI stories:\n{{ JSON.stringify($json.data) }}\n\nAnswer the user's question using the stories. If they just want the top news, give the single biggest story and your take on it. Be conversational — this is a chat.",
+        "options": {
+          "systemMessage": "You are the research assistant inside the user's own chat app, voiced as The Data Doc. Practical, contrarian, no hype. Keep answers chat-length unless asked for more."
+        }
+      },
+      "id": "agent",
+      "name": "Research Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [850, 300]
+    },
+    {
+      "parameters": { "modelName": "models/gemini-1.5-flash" },
+      "id": "chat-model",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [810, 520],
+      "notes": "Add your free Gemini credential here."
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"reply\": $json.output } }}",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Chat UI",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1080, 300],
+      "notes": "Sends the agent's answer back to the chat app as { reply: ... }."
+    }
+  ],
+  "connections": {
+    "Chat UI Webhook": { "main": [[{ "node": "Read AI News (RSS)", "type": "main", "index": 0 }]] },
+    "Read AI News (RSS)": { "main": [[{ "node": "Combine Stories", "type": "main", "index": 0 }]] },
+    "Combine Stories": { "main": [[{ "node": "Research Agent", "type": "main", "index": 0 }]] },
+    "Google Gemini Chat Model": { "ai_languageModel": [[{ "node": "Research Agent", "type": "ai_languageModel", "index": 0 }]] },
+    "Research Agent": { "main": [[{ "node": "Respond to Chat UI", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }
+}

@@ -1,0 +1,91 @@
+{
+  "name": "Research Agent — Week 1 (Inside the AI)",
+  "meta": {
+    "templateCredit": "Adapted from n8n template #9155 'Daily AI news monitoring from Google & Hacker News' by Mano (manocontent): https://n8n.io/workflows/9155-daily-ai-news-monitoring-and-summarization-with-gpt-4-from-google-and-hacker-news-to-telegram/"
+  },
+  "nodes": [
+    {
+      "parameters": { "rule": { "interval": [ { "field": "days", "triggerAtHour": 7 } ] } },
+      "id": "schedule",
+      "name": "Every morning 7am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [180, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://news.google.com/rss/search?q=artificial+intelligence+when:1d&hl=en-US&gl=US&ceid=US:en",
+        "options": {}
+      },
+      "id": "rss-google",
+      "name": "Google News (AI)",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [400, 220],
+      "notes": "Trending AI news, last 24h. Free, no key. Change q= to focus a topic."
+    },
+    {
+      "parameters": {
+        "url": "https://hnrss.org/frontpage",
+        "options": {}
+      },
+      "id": "rss-hn",
+      "name": "Hacker News",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [400, 380],
+      "notes": "The community pulse — great for hot-take angles. Free, no key."
+    },
+    {
+      "parameters": { "mode": "append" },
+      "id": "merge",
+      "name": "Merge Sources",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [620, 300]
+    },
+    {
+      "parameters": { "aggregate": "aggregateAllItemData", "options": {} },
+      "id": "aggregate",
+      "name": "Combine Stories",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [820, 300]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here are today's AI stories from Google News and Hacker News:\n\n{{ JSON.stringify($json.data) }}\n\nProduce:\n## TOP STORY (name it + one-line why)\n## THREE ANGLES (bold take + one sentence each; practical, contrarian, no hype)\n## SHORT SCRIPT for the best angle: HOOK (3s) / CONTEXT (10-15s) / THE TAKE / CTA. Speakable, no stage directions.",
+        "options": {
+          "systemMessage": "You are the research producer for The Data Doc. Practical, a little contrarian, allergic to hype. Find what actually matters to builders and everyday people."
+        }
+      },
+      "id": "agent",
+      "name": "Research Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [1020, 300]
+    },
+    {
+      "parameters": { "modelName": "models/gemini-1.5-flash" },
+      "id": "chat-model",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [980, 520],
+      "notes": "Add your free Gemini credential here: https://aistudio.google.com/apikey"
+    }
+  ],
+  "connections": {
+    "Every morning 7am": { "main": [[
+      { "node": "Google News (AI)", "type": "main", "index": 0 },
+      { "node": "Hacker News", "type": "main", "index": 0 }
+    ]] },
+    "Google News (AI)": { "main": [[{ "node": "Merge Sources", "type": "main", "index": 0 }]] },
+    "Hacker News": { "main": [[{ "node": "Merge Sources", "type": "main", "index": 1 }]] },
+    "Merge Sources": { "main": [[{ "node": "Combine Stories", "type": "main", "index": 0 }]] },
+    "Combine Stories": { "main": [[{ "node": "Research Agent", "type": "main", "index": 0 }]] },
+    "Google Gemini Chat Model": { "ai_languageModel": [[{ "node": "Research Agent", "type": "ai_languageModel", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }
+}
