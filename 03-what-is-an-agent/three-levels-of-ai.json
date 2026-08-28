@@ -1,0 +1,460 @@
+{
+ "name": "The 3 Levels of AI \u2014 LLM vs Workflow vs Work Agent (free AI employee)",
+ "nodes": [
+  {
+   "parameters": {
+    "content": "## LEVEL 1 \u2014 THE LLM\nPassive. You ask, it answers from what it knows.\nIt cannot check anything, fetch anything, or act.\nClick Execute to run.",
+    "height": 120,
+    "width": 330,
+    "color": 6
+   },
+   "id": "n1",
+   "name": "Sticky L1",
+   "type": "n8n-nodes-base.stickyNote",
+   "typeVersion": 1,
+   "position": [
+    140,
+    60
+   ]
+  },
+  {
+   "parameters": {},
+   "id": "m1",
+   "name": "Run Level 1",
+   "type": "n8n-nodes-base.manualTrigger",
+   "typeVersion": 1,
+   "position": [
+    180,
+    220
+   ]
+  },
+  {
+   "parameters": {
+    "assignments": {
+     "assignments": [
+      {
+       "id": "q1",
+       "name": "question",
+       "type": "string",
+       "value": "What is the biggest AI news story today?"
+      }
+     ]
+    },
+    "options": {}
+   },
+   "id": "set1",
+   "name": "The Question",
+   "type": "n8n-nodes-base.set",
+   "typeVersion": 3.4,
+   "position": [
+    380,
+    220
+   ]
+  },
+  {
+   "parameters": {
+    "promptType": "define",
+    "text": "={{ $json.question }}",
+    "messages": {
+     "messageValues": [
+      {
+       "message": "Answer the user's question. You have no tools and no internet \u2014 answer only from training knowledge, and be honest when your information may be out of date."
+      }
+     ]
+    }
+   },
+   "id": "llm1",
+   "name": "Just an LLM",
+   "type": "@n8n/n8n-nodes-langchain.chainLlm",
+   "typeVersion": 1.5,
+   "position": [
+    580,
+    220
+   ]
+  },
+  {
+   "parameters": {
+    "modelName": "models/gemini-2.5-flash"
+   },
+   "id": "g1",
+   "name": "Gemini (L1)",
+   "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+   "typeVersion": 1,
+   "position": [
+    560,
+    400
+   ]
+  },
+  {
+   "parameters": {
+    "content": "## LEVEL 2 \u2014 THE AI WORKFLOW\nConnected + multi-step... but I decided the path\nin advance: fetch news \u2192 summarize. Every time.\nThe AI never chooses. Click Execute to run.",
+    "height": 130,
+    "width": 330,
+    "color": 5
+   },
+   "id": "n2",
+   "name": "Sticky L2",
+   "type": "n8n-nodes-base.stickyNote",
+   "typeVersion": 1,
+   "position": [
+    140,
+    560
+   ]
+  },
+  {
+   "parameters": {},
+   "id": "m2",
+   "name": "Run Level 2",
+   "type": "n8n-nodes-base.manualTrigger",
+   "typeVersion": 1,
+   "position": [
+    180,
+    730
+   ]
+  },
+  {
+   "parameters": {
+    "url": "https://news.google.com/rss/search?q=artificial+intelligence+when:1d&hl=en-US&gl=US&ceid=US:en",
+    "options": {}
+   },
+   "id": "rss2",
+   "name": "Step 1: Fetch AI News",
+   "type": "n8n-nodes-base.rssFeedRead",
+   "typeVersion": 1.1,
+   "position": [
+    380,
+    730
+   ]
+  },
+  {
+   "parameters": {
+    "aggregate": "aggregateAllItemData",
+    "options": {}
+   },
+   "id": "agg2",
+   "name": "Step 2: Bundle",
+   "type": "n8n-nodes-base.aggregate",
+   "typeVersion": 1,
+   "position": [
+    580,
+    730
+   ]
+  },
+  {
+   "parameters": {
+    "promptType": "define",
+    "text": "=Summarize the top 3 AI stories from this feed in plain language:\n{{ JSON.stringify($json.data) }}",
+    "messages": {
+     "messageValues": [
+      {
+       "message": "You are a news summarizer. Follow the instruction exactly. You do not choose what to do \u2014 the pipeline already decided."
+      }
+     ]
+    }
+   },
+   "id": "llm2",
+   "name": "Step 3: Summarize (fixed path)",
+   "type": "@n8n/n8n-nodes-langchain.chainLlm",
+   "typeVersion": 1.5,
+   "position": [
+    780,
+    730
+   ]
+  },
+  {
+   "parameters": {
+    "modelName": "models/gemini-2.5-flash"
+   },
+   "id": "g2",
+   "name": "Gemini (L2)",
+   "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+   "typeVersion": 1,
+   "position": [
+    760,
+    910
+   ]
+  },
+  {
+   "parameters": {
+    "content": "## LEVEL 3 \u2014 THE WORK AGENT\n(the $35/month 'AI employee' \u2014 free)\nIT decides the next step across your real work:\n\u00b7 reads your inbox \u2192 tells you what needs you\n\u00b7 WRITES reply drafts (never sends \u2014 you stay in control)\n\u00b7 briefs your meetings from calendar + email context\n\u00b7 does your invoice math\nNobody tells it which tool. That's the whole difference.",
+    "height": 205,
+    "width": 350,
+    "color": 4
+   },
+   "id": "n3",
+   "name": "Sticky L3",
+   "type": "n8n-nodes-base.stickyNote",
+   "typeVersion": 1,
+   "position": [
+    140,
+    1080
+   ]
+  },
+  {
+   "parameters": {
+    "options": {}
+   },
+   "id": "chat3",
+   "name": "Chat With the Agent",
+   "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+   "typeVersion": 1.1,
+   "position": [
+    180,
+    1300
+   ],
+   "webhookId": "three-levels-agent"
+  },
+  {
+   "parameters": {
+    "options": {
+     "systemMessage": "You are the user's work assistant \u2014 an executive-assistant style agent with tools. Decide for yourself which tool each request needs: read My Inbox for anything about email; use Draft a Reply to WRITE a reply as a Gmail draft when the user asks you to respond to something (always a draft, never sent \u2014 say 'draft is in your Drafts folder' when done); check My Calendar for schedule, meetings, or availability; use the Calculator for arithmetic like billing math. For meeting-prep questions, combine Calendar AND Inbox to brief them. Be concise, practical, and briefly mention which tools you used so the human sees your decisions."
+    }
+   },
+   "id": "agent3",
+   "name": "The Agent (it decides)",
+   "type": "@n8n/n8n-nodes-langchain.agent",
+   "typeVersion": 1.7,
+   "position": [
+    440,
+    1300
+   ]
+  },
+  {
+   "parameters": {
+    "modelName": "models/gemini-2.5-flash"
+   },
+   "id": "g3",
+   "name": "Gemini (L3)",
+   "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+   "typeVersion": 1,
+   "position": [
+    340,
+    1490
+   ]
+  },
+  {
+   "parameters": {},
+   "id": "calc3",
+   "name": "Calculator",
+   "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+   "typeVersion": 1,
+   "position": [
+    520,
+    1490
+   ]
+  },
+  {
+   "parameters": {
+    "operation": "getAll",
+    "limit": 20,
+    "simple": true,
+    "filters": {
+     "q": "in:inbox newer_than:1d"
+    },
+    "options": {}
+   },
+   "id": "gm3",
+   "name": "My Inbox (24h)",
+   "type": "n8n-nodes-base.gmailTool",
+   "typeVersion": 2.1,
+   "position": [
+    800,
+    1490
+   ],
+   "notes": "Gmail credential. Fixed fetch: last 24h inbox \u2014 the agent decides WHEN to use it."
+  },
+  {
+   "parameters": {
+    "operation": "getAll",
+    "calendar": {
+     "__rl": true,
+     "mode": "list",
+     "value": "primary"
+    },
+    "limit": 20,
+    "options": {
+     "timeMin": "={{ $now.startOf('day').toISO() }}",
+     "timeMax": "={{ $now.endOf('day').plus({ days: 1 }).toISO() }}"
+    }
+   },
+   "id": "cal3",
+   "name": "My Calendar (today+tomorrow)",
+   "type": "n8n-nodes-base.googleCalendarTool",
+   "typeVersion": 1.3,
+   "position": [
+    960,
+    1490
+   ],
+   "notes": "Google Calendar credential. Fixed window \u2014 the agent decides WHEN to look."
+  },
+  {
+   "parameters": {
+    "resource": "draft",
+    "operation": "create",
+    "subject": "={{ $fromAI('subject', 'the reply subject line, usually Re: the original subject') }}",
+    "emailType": "text",
+    "message": "={{ $fromAI('body', 'the full reply text, professional and warm, ready to send') }}",
+    "options": {
+     "sendTo": "={{ $fromAI('to', 'the recipient email address from the original message') }}"
+    }
+   },
+   "id": "draft3",
+   "name": "Draft a Reply",
+   "type": "n8n-nodes-base.gmailTool",
+   "typeVersion": 2.1,
+   "position": [
+    800,
+    1620
+   ],
+   "notes": "Same Gmail credential. Creates a DRAFT \u2014 the agent never sends. You review and hit send yourself."
+  }
+ ],
+ "connections": {
+  "Run Level 1": {
+   "main": [
+    [
+     {
+      "node": "The Question",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "The Question": {
+   "main": [
+    [
+     {
+      "node": "Just an LLM",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "Gemini (L1)": {
+   "ai_languageModel": [
+    [
+     {
+      "node": "Just an LLM",
+      "type": "ai_languageModel",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "Run Level 2": {
+   "main": [
+    [
+     {
+      "node": "Step 1: Fetch AI News",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "Step 1: Fetch AI News": {
+   "main": [
+    [
+     {
+      "node": "Step 2: Bundle",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "Step 2: Bundle": {
+   "main": [
+    [
+     {
+      "node": "Step 3: Summarize (fixed path)",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "Gemini (L2)": {
+   "ai_languageModel": [
+    [
+     {
+      "node": "Step 3: Summarize (fixed path)",
+      "type": "ai_languageModel",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "Chat With the Agent": {
+   "main": [
+    [
+     {
+      "node": "The Agent (it decides)",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "Gemini (L3)": {
+   "ai_languageModel": [
+    [
+     {
+      "node": "The Agent (it decides)",
+      "type": "ai_languageModel",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "Calculator": {
+   "ai_tool": [
+    [
+     {
+      "node": "The Agent (it decides)",
+      "type": "ai_tool",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "My Inbox (24h)": {
+   "ai_tool": [
+    [
+     {
+      "node": "The Agent (it decides)",
+      "type": "ai_tool",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "My Calendar (today+tomorrow)": {
+   "ai_tool": [
+    [
+     {
+      "node": "The Agent (it decides)",
+      "type": "ai_tool",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "Draft a Reply": {
+   "ai_tool": [
+    [
+     {
+      "node": "The Agent (it decides)",
+      "type": "ai_tool",
+      "index": 0
+     }
+    ]
+   ]
+  }
+ },
+ "settings": {
+  "executionOrder": "v1"
+ }
+}
