@@ -1,0 +1,564 @@
+{
+  "name": "OPC OS — 03 Qualify & Book",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "qualify",
+        "options": {}
+      },
+      "id": "c42f4fef-6281-4f44-b345-7238acc4e736",
+      "name": "Qualify Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1200,
+        224
+      ],
+      "webhookId": "opc-qualify"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build the AI request from the lead + tenant config passed by the Intake Router\nconst input = $input.first().json.body || $input.first().json;\nconst lead = input;\nconst co = input._company || {};\n\nconst prompt = [\n  'You are the lead qualification agent for ' + (co.company_name || 'this company') + '.',\n  '',\n  'QUALIFICATION CRITERIA:',\n  co.qualification_criteria || 'Any genuine business inquiry qualifies.',\n  '',\n  'BRAND VOICE FOR THE REPLY:',\n  co.brand_voice || 'Professional and friendly.',\n  '',\n  'BOOKING LINK (include it ONLY if qualified): ' + (co.calendar_link || ''),\n  '',\n  'LEAD:',\n  'Name: ' + lead.name,\n  'Email: ' + lead.email,\n  'Phone: ' + lead.phone,\n  'Source: ' + lead.source,\n  'Message: ' + lead.message,\n  '',\n  'Score this lead 0-100 against the criteria. Decide: qualified (clearly meets criteria), borderline (unclear or partially meets), or disqualified (clearly does not meet).',\n  'Write a reply email in the brand voice. If qualified, invite them to book via the booking link. If borderline, write the reply you WOULD send so a human can approve it. If disqualified, write a short polite decline.',\n  '',\n  'Respond with ONLY raw JSON, no markdown fences, exactly this shape:',\n  '{\"score\": <number>, \"decision\": \"qualified|borderline|disqualified\", \"reasoning\": \"<one sentence>\", \"reply_subject\": \"<subject>\", \"reply_body\": \"<email body>\"}'\n].join('\\n');\n\nreturn [{\n  json: {\n    lead: lead,\n    company: co,\n    request_body: {\n      model: co.ai_model || 'claude-sonnet-4-6',\n      max_tokens: 1024,\n      messages: [{ role: 'user', content: prompt }]\n    }\n  }\n}];"
+      },
+      "id": "6ef7db17-0d8f-4561-9279-e96c99e2b43e",
+      "name": "Build AI Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -976,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the model's JSON verdict and re-attach lead + company context\nconst resp = $input.first().json;\nconst lead = $('Build AI Prompt').first().json.lead;\nconst company = $('Build AI Prompt').first().json.company;\n\nlet text = '';\nif (Array.isArray(resp.content)) {\n  text = resp.content.filter(b => b.type === 'text').map(b => b.text).join('\\n');\n}\ntext = text.replace(/```json|```/g, '').trim();\n\nlet verdict;\ntry {\n  verdict = JSON.parse(text);\n} catch (e) {\n  verdict = { score: 0, decision: 'borderline', reasoning: 'AI response was not valid JSON — routed to human review. Raw: ' + text.slice(0, 200), reply_subject: 'Re: your inquiry', reply_body: '' };\n}\n\nconst decision = ['qualified','borderline','disqualified'].includes(verdict.decision) ? verdict.decision : 'borderline';\n\nreturn [{\n  json: {\n    ...lead,\n    _company: company,\n    score: verdict.score,\n    decision: decision,\n    reasoning: verdict.reasoning || '',\n    reply_subject: verdict.reply_subject || ('Re: your inquiry to ' + (company.company_name || '')),\n    reply_body: verdict.reply_body || ''\n  }\n}];"
+      },
+      "id": "732685f8-af23-433d-b825-03ad168bbc6c",
+      "name": "Parse Verdict",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -464,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.decision }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "qualified"
+            },
+            {
+              "value2": "borderline"
+            },
+            {
+              "value2": "disqualified"
+            }
+          ]
+        }
+      },
+      "id": "355b2a3f-d2d0-4f0f-acf3-cd18c2f79af5",
+      "name": "Route by Decision",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "={{ $json.reply_subject }}",
+        "emailType": "text",
+        "message": "={{ $json.reply_body }}",
+        "options": {}
+      },
+      "id": "536380b6-6b09-49e8-b769-8f4ade4ab638",
+      "name": "Send Qualified Reply",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -48,
+        -80
+      ],
+      "webhookId": "32e0c606-c4eb-4dd5-adc1-7db1e1391844",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "pk3xNveY4XB5BHJX",
+          "name": "Gmail account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "={{ $json._company.notification_channel }}",
+          "mode": "name"
+        },
+        "text": "={{ '🟡 *HUMAN REVIEW NEEDED — ' + $json._company.company_name + '*\\n\\n*Lead:* ' + $json.name + ' (' + $json.email + ')\\n*Source:* ' + $json.source + '\\n*Message:* ' + $json.message + '\\n\\n*AI score:* ' + $json.score + ' — ' + $json.reasoning + '\\n\\n*Draft reply:*\\n' + $json.reply_body + '\\n\\n✅ Approve & send: https://YOUR-INSTANCE.app.n8n.cloud/webhook/cockpit-decision?action=approve&lead_id=' + $json.lead_id + '&company_id=' + $json.company_id + '\\n❌ Reject: https://YOUR-INSTANCE.app.n8n.cloud/webhook/cockpit-decision?action=reject&lead_id=' + $json.lead_id + '&company_id=' + $json.company_id }}",
+        "otherOptions": {}
+      },
+      "id": "1b5c26df-baa8-4264-959f-47ed817f2016",
+      "name": "Cockpit — Ask Human",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        -32,
+        112
+      ],
+      "webhookId": "20a7dd67-f233-4217-bdb0-c85e400feb72",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "kN111tifvA4UnXvp",
+          "name": "Slack account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk",
+          "mode": "list",
+          "cachedResultName": "Master Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 142490898,
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit#gid=142490898"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "lead_id": "={{ $json.lead_id }}",
+            "status": "=new",
+            "score": "={{ $json.score }}"
+          },
+          "matchingColumns": [
+            "lead_id"
+          ],
+          "schema": [
+            {
+              "id": "lead_id",
+              "displayName": "lead_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "company_id",
+              "displayName": "company_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "ed7f1844-8bca-4509-b5d0-dc828b6c60f1",
+      "name": "Update Lead Row",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        272,
+        96
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jntfyH8RIR7FVDEu",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk",
+          "mode": "list",
+          "cachedResultName": "Master Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1891384894,
+          "mode": "list",
+          "cachedResultName": "Events",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit#gid=1891384894"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $now.toISO() }}",
+            "company_id": "={{ $json.company_id }}",
+            "workflow": "Qualify & Book",
+            "event_type": "={{ 'lead.' + $json.decision }}",
+            "payload": "={{ JSON.stringify({ lead_id: $json.lead_id, score: $json.score, reasoning: $json.reasoning }) }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "company_id",
+              "displayName": "company_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "workflow",
+              "displayName": "workflow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "event_type",
+              "displayName": "event_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "payload",
+              "displayName": "payload",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "70be7b53-e9c0-4af5-948e-a840f202a0cc",
+      "name": "Log Event",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        448,
+        96
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jntfyH8RIR7FVDEu",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "={{ $json.request_body.model }}",
+          "mode": "id"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.request_body.messages[0].content }}"
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": 1024
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        224
+      ],
+      "id": "5bdc762c-c0ee-467e-8c6a-ac2ea588d530",
+      "name": "Message a model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "eZp1eqL37xxxwxDc",
+          "name": "Anthropic account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://docdata.app.n8n.cloud/webhook/quote",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ lead_id: $('Parse Verdict').first().json.lead_id, company_id: $('Parse Verdict').first().json.company_id }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        96,
+        -80
+      ],
+      "id": "d7a69960-dd77-4f6d-892a-e1087b2b8f90",
+      "name": "HTTP Request"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Qualify Webhook": {
+      "main": [
+        [
+          {
+            "node": "Build AI Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build AI Prompt": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Verdict": {
+      "main": [
+        [
+          {
+            "node": "Route by Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Decision": {
+      "main": [
+        [
+          {
+            "node": "Send Qualified Reply",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cockpit — Ask Human",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Lead Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Qualified Reply": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cockpit — Ask Human": {
+      "main": [
+        [
+          {
+            "node": "Update Lead Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Lead Row": {
+      "main": [
+        [
+          {
+            "node": "Log Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Parse Verdict",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Update Lead Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "16cb6706-5498-4352-8917-721910a38d43",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "57441320b70178d806e96b762a15bb75202665623bb949270cccba67ddc8527d"
+  },
+  "nodeGroups": [],
+  "id": "7Ihf0uwWADXMqudk",
+  "tags": []
+}

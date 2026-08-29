@@ -1,0 +1,895 @@
+{
+  "name": "OPC OS — 07 Ops & Delivery",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "job-create",
+        "options": {}
+      },
+      "id": "d9be8f55-2d29-4a53-aafc-2e05cc71f16c",
+      "name": "Job Create Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "opc-job-create"
+    },
+    {
+      "parameters": {
+        "jsCode": "const b=$input.first().json.body||$input.first().json;return [{json:{quote_id:b.quote_id,company_id:b.company_id}}];"
+      },
+      "id": "74d168b8-8180-456f-b3fb-ed22ce072937",
+      "name": "Extract Quote",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk",
+          "mode": "list",
+          "cachedResultName": "Master Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 5666118,
+          "mode": "list",
+          "cachedResultName": "Quotes",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit#gid=5666118"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "quote_id",
+              "lookupValue": "={{ $json.quote_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "dfe4274d-5ec0-49fc-bebf-663696fa1e7f",
+      "name": "Get Quote",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        448,
+        0
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jntfyH8RIR7FVDEu",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk",
+          "mode": "list",
+          "cachedResultName": "Master Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 142490898,
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit#gid=142490898"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "lead_id",
+              "lookupValue": "={{ $json.lead_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "eb0fb341-37d7-4b48-9adc-7c71bee9c385",
+      "name": "Get Lead",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        672,
+        0
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jntfyH8RIR7FVDEu",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk",
+          "mode": "list",
+          "cachedResultName": "Master Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 854180788,
+          "mode": "list",
+          "cachedResultName": "Companies",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit#gid=854180788"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "company_id",
+              "lookupValue": "={{ $('Get Quote').first().json.company_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ad67e6bf-65cb-4e30-b5bb-859aa7b294f4",
+      "name": "Get Company",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        880,
+        0
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jntfyH8RIR7FVDEu",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const quote=$('Get Quote').first().json;const lead=$('Get Lead').first().json;const co=$('Get Company').first().json;\nconst due=new Date(Date.now()+14*86400000).toISOString().slice(0,10);\nreturn [{json:{job_id:'jb_'+Date.now(),company_id:quote.company_id,quote_id:quote.quote_id,lead_id:lead.lead_id,email:lead.email,name:lead.name,description:('Deliver: '+quote.line_items),due_date:due,company:co,done_link:'https://docdata.app.n8n.cloud/webhook/job-delivered?job_id=jb_PLACEHOLDER'}}].map(i=>{i.json.done_link=i.json.done_link.replace('jb_PLACEHOLDER',i.json.job_id)+'&company_id='+i.json.company_id;return i;});"
+      },
+      "id": "9ad1c7ef-9633-4af6-9cb5-78b85e573547",
+      "name": "Build Job",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk",
+          "mode": "list",
+          "cachedResultName": "Master Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 303421750,
+          "mode": "list",
+          "cachedResultName": "Jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit#gid=303421750"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "job_id": "={{ $json.job_id }}",
+            "company_id": "={{ $json.company_id }}",
+            "quote_id": "={{ $json.quote_id }}",
+            "description": "={{ $json.description }}",
+            "status": "scheduled",
+            "due_date": "={{ $json.due_date }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "job_id",
+              "displayName": "job_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "company_id",
+              "displayName": "company_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "quote_id",
+              "displayName": "quote_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "due_date",
+              "displayName": "due_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "delivered_at",
+              "displayName": "delivered_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "977fa940-d1d8-4946-92da-15a8b1c6597a",
+      "name": "Save Job",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1328,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jntfyH8RIR7FVDEu",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Build Job').first().json.email }}",
+        "subject": "={{ 'Welcome aboard — your project with ' + $('Build Job').first().json.company.company_name + ' is scheduled' }}",
+        "emailType": "text",
+        "message": "={{ 'Hi ' + $('Build Job').first().json.name + ',\\n\\nYour contract is signed and your project is officially scheduled.\\n\\nScope: ' + $('Build Job').first().json.description + '\\nTarget delivery: ' + $('Build Job').first().json.due_date + '\\n\\nWe will keep you posted at every milestone.\\n\\n— ' + $('Build Job').first().json.company.company_name }}",
+        "options": {}
+      },
+      "id": "c44df71b-68e9-485c-918f-49a63a2a359d",
+      "name": "Kickoff Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1552,
+        0
+      ],
+      "webhookId": "8fe3e874-fae1-4b8e-b034-5f3b2deda97d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "pk3xNveY4XB5BHJX",
+          "name": "Gmail account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "={{ $('Build Job').first().json.company.notification_channel }}",
+          "mode": "name"
+        },
+        "text": "={{ '🛠️ *NEW JOB — ' + $('Build Job').first().json.company.company_name + '*\\nJob: ' + $('Build Job').first().json.job_id + '\\nClient: ' + $('Build Job').first().json.name + ' (' + $('Build Job').first().json.email + ')\\nScope: ' + $('Build Job').first().json.description + '\\nDue: ' + $('Build Job').first().json.due_date + '\\n\\nWhen delivered, click: ' + $('Build Job').first().json.done_link }}",
+        "otherOptions": {}
+      },
+      "id": "69b8e271-e469-4334-8526-97cac8e0eeaf",
+      "name": "Notify Cockpit",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        1760,
+        0
+      ],
+      "webhookId": "45ca9e4a-9db7-4c6b-a242-8b76d1c25d7c",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "kN111tifvA4UnXvp",
+          "name": "Slack account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk",
+          "mode": "list",
+          "cachedResultName": "Master Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1891384894,
+          "mode": "list",
+          "cachedResultName": "Events",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit#gid=1891384894"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "payload": "={{ JSON.stringify({ job_id: $json.job_id, due: $json.due_date }) }}",
+            "event_type": "job.created",
+            "workflow": "Ops Delivery",
+            "company_id": "={{ $json.company_id }}",
+            "timestamp": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "company_id",
+              "displayName": "company_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "workflow",
+              "displayName": "workflow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "event_type",
+              "displayName": "event_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "payload",
+              "displayName": "payload",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "a3ed7d03-5083-4013-9fb7-d6469af15182",
+      "name": "Log Event",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1984,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jntfyH8RIR7FVDEu",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "job-delivered",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "15feb428-6082-49d9-8a1a-f5e9a223e264",
+      "name": "Job Delivered Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        400
+      ],
+      "webhookId": "opc-job-delivered"
+    },
+    {
+      "parameters": {
+        "jsCode": "const q=$input.first().json.query||{};if(!q.job_id)throw new Error('missing job_id');return [{json:{job_id:q.job_id,company_id:q.company_id||''}}];"
+      },
+      "id": "56f8f8e6-6be1-449f-9957-18d461406ece",
+      "name": "Parse Delivered",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk",
+          "mode": "list",
+          "cachedResultName": "Master Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 303421750,
+          "mode": "list",
+          "cachedResultName": "Jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit#gid=303421750"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "job_id": "={{ $json.job_id }}",
+            "status": "delivered",
+            "delivered_at": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [
+            "job_id"
+          ],
+          "schema": [
+            {
+              "id": "job_id",
+              "displayName": "job_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "company_id",
+              "displayName": "company_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "quote_id",
+              "displayName": "quote_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "due_date",
+              "displayName": "due_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "delivered_at",
+              "displayName": "delivered_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "9f78b5e6-a2cd-43d6-89b5-b7f7e3574185",
+      "name": "Mark Delivered",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        448,
+        400
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jntfyH8RIR7FVDEu",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk",
+          "mode": "list",
+          "cachedResultName": "Master Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1891384894,
+          "mode": "list",
+          "cachedResultName": "Events",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit#gid=1891384894"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $now.toISO() }}",
+            "company_id": "={{ $json.company_id }}",
+            "workflow": "Ops Delivery",
+            "event_type": "job.delivered",
+            "payload": "={{ JSON.stringify({ job_id: $json.job_id }) }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "company_id",
+              "displayName": "company_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "workflow",
+              "displayName": "workflow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "event_type",
+              "displayName": "event_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "payload",
+              "displayName": "payload",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "f145b5c7-196b-40f1-bf90-b1dee675a244",
+      "name": "Log Delivered",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        672,
+        400
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jntfyH8RIR7FVDEu",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://docdata..app.n8n.cloud/webhook/invoice-create",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ job_id: $('Parse Delivered').first().json.job_id, company_id: $('Parse Delivered').first().json.company_id }) }}",
+        "options": {}
+      },
+      "id": "f00d1cd0-2875-4c04-99a7-c56327677def",
+      "name": "Trigger Finance (08)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "✅ Job marked delivered — invoice workflow triggered.",
+        "options": {}
+      },
+      "id": "c066e3a8-3f1d-4bb5-81da-07eea6b22959",
+      "name": "Confirm",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        400
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Job Create Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Quote",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Quote": {
+      "main": [
+        [
+          {
+            "node": "Get Quote",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Quote": {
+      "main": [
+        [
+          {
+            "node": "Get Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Lead": {
+      "main": [
+        [
+          {
+            "node": "Get Company",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Company": {
+      "main": [
+        [
+          {
+            "node": "Build Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Job": {
+      "main": [
+        [
+          {
+            "node": "Save Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Job": {
+      "main": [
+        [
+          {
+            "node": "Kickoff Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kickoff Email": {
+      "main": [
+        [
+          {
+            "node": "Notify Cockpit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Cockpit": {
+      "main": [
+        [
+          {
+            "node": "Log Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Job Delivered Webhook": {
+      "main": [
+        [
+          {
+            "node": "Parse Delivered",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Delivered": {
+      "main": [
+        [
+          {
+            "node": "Mark Delivered",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Delivered": {
+      "main": [
+        [
+          {
+            "node": "Log Delivered",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Delivered": {
+      "main": [
+        [
+          {
+            "node": "Trigger Finance (08)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger Finance (08)": {
+      "main": [
+        [
+          {
+            "node": "Confirm",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "09bd8cc7-f241-4f64-909d-8838c839e8d9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "57441320b70178d806e96b762a15bb75202665623bb949270cccba67ddc8527d"
+  },
+  "nodeGroups": [],
+  "id": "8N3FW0glK6zkYODi",
+  "tags": []
+}

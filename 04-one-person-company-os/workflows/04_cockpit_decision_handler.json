@@ -1,0 +1,541 @@
+{
+  "name": "OPC OS — 04 Cockpit Decision Handler",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "cockpit-decision",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "dff44a0f-9ac5-41b3-a11a-94e18a4414ce",
+      "name": "Decision Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1104,
+        144
+      ],
+      "webhookId": "opc-cockpit-decision"
+    },
+    {
+      "parameters": {
+        "jsCode": "const q = $input.first().json.query || {};\nconst action = (q.action || '').toLowerCase();\nif (!q.lead_id || !['approve','reject'].includes(action)) {\n  return [{ json: { valid: false, error: 'Missing lead_id or invalid action' } }];\n}\nreturn [{ json: { valid: true, lead_id: q.lead_id, company_id: q.company_id || '', action: action } }];"
+      },
+      "id": "eeb25497-8cef-4093-913c-2233da246647",
+      "name": "Parse Decision",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -880,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk",
+          "mode": "list",
+          "cachedResultName": "Master Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 142490898,
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit#gid=142490898"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "lead_id",
+              "lookupValue": "={{ $json.lead_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8185c349-20ff-42f8-a5f5-172b7f075dab",
+      "name": "Get Lead Row",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -656,
+        144
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jntfyH8RIR7FVDEu",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Recover the stored reply draft and merge with the decision\nconst lead = $input.first().json;\nconst decision = $('Parse Decision').first().json;\n\nif (!lead || !lead.lead_id) {\n  return [{ json: { valid: false, error: 'Lead not found: ' + decision.lead_id } }];\n}\n\nconst notes = lead.notes || '';\nlet subject = 'Re: your inquiry';\nlet body = '';\nconst subjMatch = notes.match(/REPLY_DRAFT_SUBJECT::(.*?)\\|\\|/s);\nconst bodyMatch = notes.match(/REPLY_DRAFT_BODY::([\\s\\S]*)/);\nif (subjMatch) subject = subjMatch[1];\nif (bodyMatch) body = bodyMatch[1];\n\nreturn [{ json: {\n  valid: true,\n  action: decision.action,\n  lead_id: lead.lead_id,\n  company_id: lead.company_id,\n  email: lead.email,\n  name: lead.name,\n  reply_subject: subject,\n  reply_body: body,\n  has_draft: body.length > 0\n} }];"
+      },
+      "id": "836a46c8-ffac-4f20-9e2d-c504088131a6",
+      "name": "Prepare Action",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -448,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "={{ $json.reply_subject }}",
+        "emailType": "text",
+        "message": "={{ $json.reply_body }}",
+        "options": {}
+      },
+      "id": "872e85b2-e5de-4d17-aead-11eecf22271f",
+      "name": "Send Approved Reply",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "50d232f7-155c-4474-8bda-89d3597fc6e2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "pk3xNveY4XB5BHJX",
+          "name": "Gmail account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk",
+          "mode": "list",
+          "cachedResultName": "Master Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 142490898,
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit#gid=142490898"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "lead_id": "={{ $json.lead_id }}",
+            "status": "={{ $json.action === 'approve' ? 'qualified' : 'disqualified' }}",
+            "notes": "={{ 'Human ' + ($json.action === 'approve' ? 'approved' : 'rejected') + ' via cockpit at ' + $now.toISO() }}"
+          },
+          "matchingColumns": [
+            "lead_id"
+          ],
+          "schema": [
+            {
+              "id": "lead_id",
+              "displayName": "lead_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "company_id",
+              "displayName": "company_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "8f523deb-b388-4199-ab17-fd49b8ce08cc",
+      "name": "Update Lead Status",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        224,
+        144
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jntfyH8RIR7FVDEu",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk",
+          "mode": "list",
+          "cachedResultName": "Master Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1891384894,
+          "mode": "list",
+          "cachedResultName": "Events",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit#gid=1891384894"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $now.toISO() }}",
+            "company_id": "={{ $json.company_id }}",
+            "workflow": "Cockpit",
+            "event_type": "={{ 'human.' + $json.action }}",
+            "payload": "={{ JSON.stringify({ lead_id: $json.lead_id }) }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "company_id",
+              "displayName": "company_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "workflow",
+              "displayName": "workflow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "event_type",
+              "displayName": "event_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "payload",
+              "displayName": "payload",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "b6caf4ee-f30a-4d77-895d-0a14d3da7841",
+      "name": "Log Event",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        448,
+        144
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jntfyH8RIR7FVDEu",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.action === 'approve' ? '✅ Approved — the reply has been sent to ' + $json.email : '❌ Rejected — lead marked disqualified. No email sent.' }}",
+        "options": {}
+      },
+      "id": "4aeebc35-2ba5-4a4f-891e-16218666cb2a",
+      "name": "Respond to Owner",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        672,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "c-valid",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "c-action",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "approve",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7cec4656-4511-425a-8d0b-aa509326cc39",
+      "name": "Approved? (FIXED)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -240,
+        144
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Decision Webhook": {
+      "main": [
+        [
+          {
+            "node": "Parse Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Decision": {
+      "main": [
+        [
+          {
+            "node": "Get Lead Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Lead Row": {
+      "main": [
+        [
+          {
+            "node": "Prepare Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Action": {
+      "main": [
+        [
+          {
+            "node": "Approved? (FIXED)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Approved Reply": {
+      "main": [
+        [
+          {
+            "node": "Update Lead Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Lead Status": {
+      "main": [
+        [
+          {
+            "node": "Log Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Event": {
+      "main": [
+        [
+          {
+            "node": "Respond to Owner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approved? (FIXED)": {
+      "main": [
+        [
+          {
+            "node": "Send Approved Reply",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Lead Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "cab92b5f-e07c-481b-9dc0-43a7ec820251",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "57441320b70178d806e96b762a15bb75202665623bb949270cccba67ddc8527d"
+  },
+  "nodeGroups": [],
+  "id": "PLanGmlIO1gwSnIC",
+  "tags": []
+}

@@ -1,0 +1,447 @@
+{
+  "name": "OPC OS — 11 Email Lead Capture (Auto-Advance)",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "labelIds": [
+            "INBOX"
+          ],
+          "readStatus": "unread"
+        }
+      },
+      "id": "10da2ac0-9085-490c-be5c-9b77bda4d8d8",
+      "name": "Gmail Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -64,
+        1408
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "pk3xNveY4XB5BHJX",
+          "name": "Gmail account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const m = $input.first().json;\nconst fromRaw = m.from || m.From || '';\nconst emailMatch = String(fromRaw).match(/<(.+?)>/);\nconst email = emailMatch ? emailMatch[1] : String(fromRaw).trim();\nconst name = String(fromRaw).replace(/<.+?>/, '').replace(/\"/g, '').trim() || email;\nconst subject = m.subject || m.Subject || '';\nconst body = (m.textPlain || m.snippet || m.text || '').slice(0, 1500);\nif (!email || /mailer-daemon|noreply|no-reply/i.test(email)) return [];\nreturn [{ json: { email, name, message: (subject + ' — ' + body).trim() } }];"
+      },
+      "id": "c14bbfda-10d7-4bb1-a36a-9b2ad05d7262",
+      "name": "Normalize Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        1408
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk",
+          "mode": "list",
+          "cachedResultName": "Master Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 142490898,
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit#gid=142490898"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "email",
+              "lookupValue": "={{ $json.email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "440f0089-0de9-4a39-814d-df4c0857b3b4",
+      "name": "Check Existing Lead",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        384,
+        1408
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jntfyH8RIR7FVDEu",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "c-new",
+              "leftValue": "={{ $json.lead_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a019aaae-dcd5-47d0-9cf4-9d23936b0fca",
+      "name": "New Lead?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        608,
+        1408
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://docdata.app.n8n.cloud/webhook/intake",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-opc-key",
+              "value": "PASTE_YOUR_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ company_id: 'co_001', source: 'email', name: $('Normalize Email').first().json.name, email: $('Normalize Email').first().json.email, phone: '', message: $('Normalize Email').first().json.message }) }}",
+        "options": {}
+      },
+      "id": "2bbc44b2-0eba-43ba-9164-230f2ccfb65e",
+      "name": "Send to Intake",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        816,
+        1248
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const lead = $('Check Existing Lead').first().json;\nconst msg = $('Normalize Email').first().json;\nconst prompt = ['You classify a reply email from a sales lead.', '', 'REPLY:', msg.message, '', 'Classify the sender\\'s intent. Respond ONLY raw JSON, no fences:', '{\"intent\": \"buy\" | \"question\" | \"negative\" | \"other\", \"summary\": \"<one sentence>\"}', '', 'buy = wants to proceed, sign up, get access, or clearly says yes. question = asking something before deciding. negative = not interested / unsubscribe. other = anything else.'].join('\\n');\nreturn [{ json: { lead, msg, request_body: { model: 'claude-sonnet-4-6', max_tokens: 200, messages: [{ role: 'user', content: prompt }] } } }];"
+      },
+      "id": "9e78d0f3-afa7-4195-9b66-835718d26df2",
+      "name": "Build Intent Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        816,
+        1568
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "claude-sonnet-4-6",
+          "mode": "id"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.request_body.messages[0].content }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0989c9ef-f2f4-464e-86dc-3b619d0a4abf",
+      "name": "AI Read Intent",
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        1568
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "eZp1eqL37xxxwxDc",
+          "name": "Anthropic account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const resp = $input.first().json;\nconst lead = $('Build Intent Prompt').first().json.lead;\nconst msg = $('Build Intent Prompt').first().json.msg;\nlet text = '';\nif (Array.isArray(resp.content)) text = resp.content.filter(b=>b.type==='text').map(b=>b.text).join('');\nelse if (typeof resp.text === 'string') text = resp.text;\nelse if (resp.message && resp.message.content) text = Array.isArray(resp.message.content) ? resp.message.content.map(b=>b.text||b).join('') : String(resp.message.content);\ntext = text.replace(/```json|```/g, '').trim();\nlet v; try { v = JSON.parse(text); } catch(e) { v = { intent: 'other', summary: 'unparseable reply' }; }\nconst quotable = ['new','qualified','pending_review'].includes(String(lead.status||'').trim());\nreturn [{ json: { lead_id: lead.lead_id, company_id: lead.company_id, email: lead.email, name: lead.name, status: lead.status, intent: v.intent, summary: v.summary, preview: msg.message.slice(0,300), auto_quote: v.intent === 'buy' && quotable } }];"
+      },
+      "id": "13e74302-16f1-49d7-ab70-310eef814889",
+      "name": "Parse Intent",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1264,
+        1568
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "c-aq",
+              "leftValue": "={{ $json.auto_quote }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "084b0777-65b0-4b46-ad8d-98bcbc6e1de7",
+      "name": "Buying Intent?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1488,
+        1568
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://docdata.app.n8n.cloud/webhook/quote",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ lead_id: $json.lead_id, company_id: $json.company_id }) }}",
+        "options": {}
+      },
+      "id": "882412df-ea3b-4a6c-8ea2-0e3a266b17f5",
+      "name": "Auto-Quote",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1696,
+        1456
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#grantlaunch-cockpit",
+          "mode": "name"
+        },
+        "text": "={{ '🤖 *Auto-quoted* — ' + $('Parse Intent').first().json.name + ' (' + $('Parse Intent').first().json.email + ') replied with buying intent: ' + $('Parse Intent').first().json.summary + '\\nQuote email sent automatically.' }}",
+        "otherOptions": {}
+      },
+      "id": "9c973d50-5466-43a7-8a8e-dc40d8653a89",
+      "name": "FYI Auto-Quoted",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        1920,
+        1456
+      ],
+      "webhookId": "8ca169bb-1ff0-4176-9e10-00e3b3195710",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "kN111tifvA4UnXvp",
+          "name": "Slack account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#grantlaunch-cockpit",
+          "mode": "name"
+        },
+        "text": "={{ '✉️ *Reply from existing lead* — ' + $('Parse Intent').first().json.name + ' (' + $('Parse Intent').first().json.email + ') — intent: ' + $('Parse Intent').first().json.intent + '\\n' + $('Parse Intent').first().json.preview }}",
+        "otherOptions": {}
+      },
+      "id": "4f125325-1042-4f53-ad82-632f25c96e17",
+      "name": "Notify Reply",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        1696,
+        1696
+      ],
+      "webhookId": "b9275f8e-6f5f-485c-8831-75b5445a7e99",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "kN111tifvA4UnXvp",
+          "name": "Slack account 4"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Normalize Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Email": {
+      "main": [
+        [
+          {
+            "node": "Check Existing Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Existing Lead": {
+      "main": [
+        [
+          {
+            "node": "New Lead?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New Lead?": {
+      "main": [
+        [
+          {
+            "node": "Send to Intake",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Intent Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Intent Prompt": {
+      "main": [
+        [
+          {
+            "node": "AI Read Intent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Read Intent": {
+      "main": [
+        [
+          {
+            "node": "Parse Intent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Intent": {
+      "main": [
+        [
+          {
+            "node": "Buying Intent?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buying Intent?": {
+      "main": [
+        [
+          {
+            "node": "Auto-Quote",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notify Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auto-Quote": {
+      "main": [
+        [
+          {
+            "node": "FYI Auto-Quoted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "8fe956c8-7c95-4aa0-9615-c022adafb535",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "57441320b70178d806e96b762a15bb75202665623bb949270cccba67ddc8527d"
+  },
+  "nodeGroups": [],
+  "id": "QQl4l2vT7uGJhV6E",
+  "tags": []
+}

@@ -1,0 +1,1494 @@
+{
+  "name": "OPC OS — 08 Finance & Back Office",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "invoice-create",
+        "options": {}
+      },
+      "id": "433b1c0a-f0e9-46cf-a0af-43ec5eb4bc3e",
+      "name": "Invoice Create Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        192,
+        912
+      ],
+      "webhookId": "opc-invoice-create"
+    },
+    {
+      "parameters": {
+        "jsCode": "const b=$input.first().json.body||$input.first().json;\nif(!b.job_id) throw new Error('invoice-create called without job_id');\nreturn [{json:{job_id:b.job_id,company_id:b.company_id||''}}];"
+      },
+      "id": "9d7c4d56-e2a5-4d91-b75b-2ddec47d28c0",
+      "name": "Extract Job",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        912
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk",
+          "mode": "list",
+          "cachedResultName": "Master Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 303421750,
+          "mode": "list",
+          "cachedResultName": "Jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit#gid=303421750"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "job_id",
+              "lookupValue": "={{ $json.job_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "898ee87e-d4fe-4e54-98d7-7858c7b27dd4",
+      "name": "Get Job",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        640,
+        912
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jntfyH8RIR7FVDEu",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk",
+          "mode": "list",
+          "cachedResultName": "Master Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 5666118,
+          "mode": "list",
+          "cachedResultName": "Quotes",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit#gid=5666118"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "quote_id",
+              "lookupValue": "={{ $json.quote_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "982311d7-8beb-4608-b423-c448b461b7d4",
+      "name": "Get Quote",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        864,
+        912
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jntfyH8RIR7FVDEu",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk",
+          "mode": "list",
+          "cachedResultName": "Master Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 142490898,
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit#gid=142490898"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "lead_id",
+              "lookupValue": "={{ $json.lead_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bd212170-a056-4da5-aaae-aa5cf048c570",
+      "name": "Get Lead",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1072,
+        912
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jntfyH8RIR7FVDEu",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk",
+          "mode": "list",
+          "cachedResultName": "Master Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 854180788,
+          "mode": "list",
+          "cachedResultName": "Companies",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit#gid=854180788"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "company_id",
+              "lookupValue": "={{ $('Get Job').first().json.company_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "02136280-1ec8-44cc-a7f4-59f762c8c432",
+      "name": "Get Company",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1296,
+        912
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jntfyH8RIR7FVDEu",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const job=$('Get Job').first().json;\nconst quote=$('Get Quote').first().json;\nconst lead=$('Get Lead').first().json;\nconst co=$('Get Company').first().json;\nif(!job.job_id) throw new Error('Job not found');\nif(!lead.email) throw new Error('Lead email missing for job '+job.job_id);\nconst invoice_id='in_'+Date.now();\nconst paid='https://docdata.app.n8n.cloud/webhook/invoice-paid?invoice_id='+invoice_id+'&company_id='+co.company_id;\nreturn [{json:{invoice_id:invoice_id,company_id:co.company_id,job_id:job.job_id,amount:quote.amount,email:lead.email,name:lead.name,company_name:co.company_name,terms:co.invoice_terms||'Net 7',mark_paid_link:paid,line_items:quote.line_items}}];"
+      },
+      "id": "88c55a6c-2b45-43c6-b500-fe7e055e212a",
+      "name": "Build Invoice",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        912
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk",
+          "mode": "list",
+          "cachedResultName": "Master Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 369981735,
+          "mode": "list",
+          "cachedResultName": "Invoices",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit#gid=369981735"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "invoice_id": "={{ $json.invoice_id }}",
+            "company_id": "={{ $json.company_id }}",
+            "job_id": "={{ $json.job_id }}",
+            "amount": "={{ $json.amount }}",
+            "status": "sent",
+            "sent_at": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "invoice_id",
+              "displayName": "invoice_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "company_id",
+              "displayName": "company_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "job_id",
+              "displayName": "job_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "amount",
+              "displayName": "amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "sent_at",
+              "displayName": "sent_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "paid_at",
+              "displayName": "paid_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "c9ec0a00-be59-495f-91be-33e4d3e183dc",
+      "name": "Save Invoice",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1744,
+        912
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jntfyH8RIR7FVDEu",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "={{ 'Invoice ' + $json.invoice_id + ' from ' + $json.company_name }}",
+        "emailType": "text",
+        "message": "={{ 'Hi ' + $json.name + ',\\n\\nYour project has been delivered. Invoice details:\\n\\n' + $json.line_items + '\\nTotal due: $' + $json.amount + '\\nTerms: ' + $json.terms + '\\n\\nPayment instructions are per your contract. Thank you for your business!\\n\\n— ' + $json.company_name }}",
+        "options": {}
+      },
+      "id": "4cf2fe1d-3654-412b-aaa5-8acf6a68a47e",
+      "name": "Email Invoice",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1952,
+        912
+      ],
+      "webhookId": "c2db05fd-63e3-49ca-915b-b5a1a805df73",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "pk3xNveY4XB5BHJX",
+          "name": "Gmail account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#opc-alerts",
+          "mode": "name"
+        },
+        "text": "={{ '💵 Invoice ' + $json.invoice_id + ' ($' + $json.amount + ') sent for ' + $json.company_name + '. Mark paid: ' + $json.mark_paid_link }}",
+        "otherOptions": {}
+      },
+      "id": "377ec0aa-da20-4b4e-bc37-ae178021d2e8",
+      "name": "Notify Cockpit — Invoiced",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        2176,
+        912
+      ],
+      "webhookId": "5312ebc2-4cc3-493c-b02e-903bfdb4e0dc",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "kN111tifvA4UnXvp",
+          "name": "Slack account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk",
+          "mode": "list",
+          "cachedResultName": "Master Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1891384894,
+          "mode": "list",
+          "cachedResultName": "Events",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit#gid=1891384894"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $now.toISO() }}",
+            "workflow": "Finance",
+            "company_id": "={{ $json.company_id }}",
+            "event_type": "invoice.sent",
+            "payload": "={{ JSON.stringify({ invoice_id: $json.invoice_id, amount: $json.amount }) }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "company_id",
+              "displayName": "company_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "workflow",
+              "displayName": "workflow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "event_type",
+              "displayName": "event_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "payload",
+              "displayName": "payload",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "20db9bdf-f159-499e-872a-c393fc9c05d0",
+      "name": "Log Event",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2400,
+        912
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jntfyH8RIR7FVDEu",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "invoice-paid",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "c3edc9a0-ee1b-47d0-aa45-fd3e4adf1322",
+      "name": "Invoice Paid Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        192,
+        1216
+      ],
+      "webhookId": "opc-invoice-paid"
+    },
+    {
+      "parameters": {
+        "jsCode": "const q=$input.first().json.query||{};\nif(!q.invoice_id) throw new Error('missing invoice_id');\nreturn [{json:{invoice_id:q.invoice_id,company_id:q.company_id||''}}];"
+      },
+      "id": "2f62d92b-f592-49f2-9318-c4c5cee9f557",
+      "name": "Parse Paid",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        1216
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk",
+          "mode": "list",
+          "cachedResultName": "Master Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 369981735,
+          "mode": "list",
+          "cachedResultName": "Invoices",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit#gid=369981735"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "invoice_id": "={{ $json.invoice_id }}",
+            "status": "paid",
+            "paid_at": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [
+            "invoice_id"
+          ],
+          "schema": [
+            {
+              "id": "invoice_id",
+              "displayName": "invoice_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "company_id",
+              "displayName": "company_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "job_id",
+              "displayName": "job_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "amount",
+              "displayName": "amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "sent_at",
+              "displayName": "sent_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "paid_at",
+              "displayName": "paid_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "1f0d461d-146d-441a-b58e-7bda6cc59e10",
+      "name": "Mark Paid",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        640,
+        1216
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jntfyH8RIR7FVDEu",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk",
+          "mode": "list",
+          "cachedResultName": "Master Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1891384894,
+          "mode": "list",
+          "cachedResultName": "Events",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit#gid=1891384894"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $now.toISO() }}",
+            "company_id": "={{ $json.company_id }}",
+            "workflow": "Finance",
+            "event_type": "invoice.paid",
+            "payload": "={{ JSON.stringify({ invoice_id: $json.invoice_id }) }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "company_id",
+              "displayName": "company_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "workflow",
+              "displayName": "workflow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "event_type",
+              "displayName": "event_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "payload",
+              "displayName": "payload",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "8c3ddb5d-ed89-4dcf-b743-70d55e9e8494",
+      "name": "Log Paid",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        864,
+        1216
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jntfyH8RIR7FVDEu",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://docdata.app.n8n.cloud/webhook/retention-start",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ invoice_id: $('Parse Paid').first().json.invoice_id, company_id: $('Parse Paid').first().json.company_id }) }}",
+        "options": {}
+      },
+      "id": "219cd92d-37ac-4b99-a77c-0811385a3643",
+      "name": "Trigger Retention (09)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1072,
+        1216
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "✅ Invoice marked paid — retention sequence started.",
+        "options": {}
+      },
+      "id": "d142a0e2-4d2d-45de-8dd1-2060fef52fe1",
+      "name": "Confirm",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1296,
+        1216
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "id": "2a37bc81-7a62-478e-a734-3ffe73bc3b86",
+      "name": "Daily Dunning Check",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        192,
+        1520
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk",
+          "mode": "list",
+          "cachedResultName": "Master Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1891384894,
+          "mode": "list",
+          "cachedResultName": "Events",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit#gid=1891384894"
+        },
+        "options": {}
+      },
+      "id": "b9c154ef-e6e8-4161-8b3b-e6ff12cde2bb",
+      "name": "Read All Invoices",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        416,
+        1520
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jntfyH8RIR7FVDEu",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const now=Date.now();const out=[];\nfor(const item of $input.all()){const inv=item.json;\n  if(inv.status!=='sent'&&inv.status!=='overdue')continue;\n  const sent=Date.parse(inv.sent_at||'');if(isNaN(sent))continue;\n  const days=(now-sent)/86400000;\n  if(days>=7){out.push({json:{...inv,days_overdue:Math.floor(days)}});}}\nreturn out;"
+      },
+      "id": "999c4ad0-b883-44a0-96f7-b56114bab13e",
+      "name": "Filter Overdue",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        1520
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk",
+          "mode": "list",
+          "cachedResultName": "Master Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 303421750,
+          "mode": "list",
+          "cachedResultName": "Jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit#gid=303421750"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "job_id",
+              "lookupValue": "={{ $json.job_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "46304a68-be06-40f1-98e8-8bd9a84fbc74",
+      "name": "Get Job for Chase",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        864,
+        1520
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jntfyH8RIR7FVDEu",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk",
+          "mode": "list",
+          "cachedResultName": "Master Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 5666118,
+          "mode": "list",
+          "cachedResultName": "Quotes",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit#gid=5666118"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "quote_id",
+              "lookupValue": "={{ $json.quote_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "579bd07f-d8c5-4ca3-909a-86a3b905f44d",
+      "name": "Get Quote for Chase",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1072,
+        1520
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jntfyH8RIR7FVDEu",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk",
+          "mode": "list",
+          "cachedResultName": "Master Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 142490898,
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit#gid=142490898"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "lead_id",
+              "lookupValue": "={{ $json.lead_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "097068b9-5df8-4a0d-8ab9-c576c55293c1",
+      "name": "Get Lead for Chase",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1296,
+        1520
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jntfyH8RIR7FVDEu",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// per-item mode: pairs each overdue invoice with ITS OWN lead\nconst inv=$('Filter Overdue').item.json;\nconst lead=$('Get Lead for Chase').item.json;\nreturn {json:{...inv,email:lead.email,name:lead.name}};"
+      },
+      "id": "c84b7d3b-b1dd-42ef-921f-828b5142df65",
+      "name": "Build Chase",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        1520
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "={{ 'Friendly reminder: invoice ' + $json.invoice_id + ' is outstanding' }}",
+        "emailType": "text",
+        "message": "={{ 'Hi ' + $json.name + ',\\n\\nJust a friendly reminder that invoice ' + $json.invoice_id + ' for $' + $json.amount + ' is now ' + $json.days_overdue + ' days outstanding. If payment is already on its way, please ignore this.\\n\\nThank you!' }}",
+        "options": {}
+      },
+      "id": "16cba744-2e2a-425c-9697-fc9a84c88a29",
+      "name": "Chase Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1744,
+        1520
+      ],
+      "webhookId": "33aa552e-96a0-41f9-9565-020d742b2e39",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "pk3xNveY4XB5BHJX",
+          "name": "Gmail account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk",
+          "mode": "list",
+          "cachedResultName": "Master Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 369981735,
+          "mode": "list",
+          "cachedResultName": "Invoices",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit#gid=369981735"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "invoice_id": "={{ $('Build Chase').item.json.invoice_id }}",
+            "status": "overdue"
+          },
+          "matchingColumns": [
+            "invoice_id"
+          ],
+          "schema": [
+            {
+              "id": "invoice_id",
+              "displayName": "invoice_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "company_id",
+              "displayName": "company_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "job_id",
+              "displayName": "job_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "amount",
+              "displayName": "amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "sent_at",
+              "displayName": "sent_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "paid_at",
+              "displayName": "paid_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "4135d270-0701-4cd0-8112-ca8a7cefaf03",
+      "name": "Flag Overdue",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1952,
+        1520
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jntfyH8RIR7FVDEu",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk",
+          "mode": "list",
+          "cachedResultName": "Master Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1891384894,
+          "mode": "list",
+          "cachedResultName": "Events",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cc89a8viT6jfowavbnZa1VkVf1wlescX5Z7Qqh7gvqk/edit#gid=1891384894"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $now.toISO() }}",
+            "company_id": "={{ $('Build Chase').item.json.company_id }}",
+            "workflow": "Finance",
+            "event_type": "invoice.chased",
+            "payload": "={{ JSON.stringify({ invoice_id: $('Build Chase').item.json.invoice_id, days: $('Build Chase').item.json.days_overdue }) }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "company_id",
+              "displayName": "company_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "workflow",
+              "displayName": "workflow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "event_type",
+              "displayName": "event_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "payload",
+              "displayName": "payload",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "2e013d80-4091-4635-8b1d-0be0797a8a0a",
+      "name": "Log Chase",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2176,
+        1520
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jntfyH8RIR7FVDEu",
+          "name": "Google Sheets account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Invoice Create Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Job": {
+      "main": [
+        [
+          {
+            "node": "Get Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Job": {
+      "main": [
+        [
+          {
+            "node": "Get Quote",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Quote": {
+      "main": [
+        [
+          {
+            "node": "Get Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Lead": {
+      "main": [
+        [
+          {
+            "node": "Get Company",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Company": {
+      "main": [
+        [
+          {
+            "node": "Build Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Invoice": {
+      "main": [
+        [
+          {
+            "node": "Save Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Invoice": {
+      "main": [
+        [
+          {
+            "node": "Email Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Invoice": {
+      "main": [
+        [
+          {
+            "node": "Notify Cockpit — Invoiced",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Cockpit — Invoiced": {
+      "main": [
+        [
+          {
+            "node": "Log Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invoice Paid Webhook": {
+      "main": [
+        [
+          {
+            "node": "Parse Paid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Paid": {
+      "main": [
+        [
+          {
+            "node": "Mark Paid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Paid": {
+      "main": [
+        [
+          {
+            "node": "Log Paid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Paid": {
+      "main": [
+        [
+          {
+            "node": "Trigger Retention (09)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger Retention (09)": {
+      "main": [
+        [
+          {
+            "node": "Confirm",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Dunning Check": {
+      "main": [
+        [
+          {
+            "node": "Read All Invoices",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read All Invoices": {
+      "main": [
+        [
+          {
+            "node": "Filter Overdue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Overdue": {
+      "main": [
+        [
+          {
+            "node": "Get Job for Chase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Job for Chase": {
+      "main": [
+        [
+          {
+            "node": "Get Quote for Chase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Quote for Chase": {
+      "main": [
+        [
+          {
+            "node": "Get Lead for Chase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Lead for Chase": {
+      "main": [
+        [
+          {
+            "node": "Build Chase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Chase": {
+      "main": [
+        [
+          {
+            "node": "Chase Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chase Email": {
+      "main": [
+        [
+          {
+            "node": "Flag Overdue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flag Overdue": {
+      "main": [
+        [
+          {
+            "node": "Log Chase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "89fb5b99-0f40-4294-9925-4eada431746f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "57441320b70178d806e96b762a15bb75202665623bb949270cccba67ddc8527d"
+  },
+  "nodeGroups": [],
+  "id": "IPb5lOFyNtkDXGMD",
+  "tags": []
+}

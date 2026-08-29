@@ -1,0 +1,95 @@
+{
+  "name": "OPC OS — 05 Error Handler",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "22cb8d87-3128-421b-8b7d-9aaa40ae88a2",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const e = $input.first().json;\nconst wf = e.workflow ? e.workflow.name : 'Unknown workflow';\nconst exec = e.execution || {};\nconst err = exec.error || {};\nreturn [{ json: {\n  text: '🔴 *OPC OS ERROR*\\n*Workflow:* ' + wf + '\\n*Node:* ' + (err.node ? err.node.name : 'unknown') + '\\n*Error:* ' + (err.message || 'no message') + '\\n*Execution:* ' + (exec.url || exec.id || 'n/a')\n} }];"
+      },
+      "id": "5f7cf0e3-6602-44aa-b67b-3e3b24f072f6",
+      "name": "Format Alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#opc-alerts",
+          "mode": "name"
+        },
+        "text": "={{ $json.text }}",
+        "otherOptions": {}
+      },
+      "id": "5c64239b-1169-472b-ac10-7f527466585b",
+      "name": "Alert Owner (Slack)",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        0
+      ],
+      "webhookId": "fb58b4e8-f136-41ad-b4b8-5791261e98cb",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "kN111tifvA4UnXvp",
+          "name": "Slack account 4"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Format Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Alert": {
+      "main": [
+        [
+          {
+            "node": "Alert Owner (Slack)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "44bc78c8-3413-4abe-b4c6-7b366be617c0",
+  "meta": {
+    "instanceId": "57441320b70178d806e96b762a15bb75202665623bb949270cccba67ddc8527d"
+  },
+  "nodeGroups": [],
+  "id": "bt8hPvrfCufGR9la",
+  "tags": []
+}

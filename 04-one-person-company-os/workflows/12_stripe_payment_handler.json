@@ -1,0 +1,267 @@
+{
+  "name": "OPC OS — 12 Stripe Payment Handler",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "stripe-payment",
+        "options": {}
+      },
+      "id": "11acba95-d10b-42fc-ada1-af87eb1107ef",
+      "name": "Stripe Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -880,
+        128
+      ],
+      "webhookId": "opc-stripe-payment",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Only act on completed checkouts; extract our invoice_id\nconst event = $input.first().json.body || $input.first().json;\nif (!event || event.type !== 'checkout.session.completed') return [];\nconst s = (event.data && event.data.object) || {};\nconst invoice_id = s.client_reference_id || (s.metadata && s.metadata.invoice_id) || '';\nreturn [{ json: {\n  invoice_id: invoice_id,\n  amount_paid: typeof s.amount_total === 'number' ? s.amount_total / 100 : null,\n  payer_email: (s.customer_details && s.customer_details.email) || s.customer_email || '',\n  stripe_session: s.id || ''\n} }];"
+      },
+      "id": "4ed9eec0-a5cc-4523-b494-d9fe0a4b06ab",
+      "name": "Extract Payment",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -656,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "PASTE_YOUR_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Invoices",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "invoice_id",
+              "lookupValue": "={{ $json.invoice_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b28d7a3b-623c-4668-8511-02ff02308219",
+      "name": "Find Invoice",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -448,
+        128
+      ],
+      "alwaysOutputData": true,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "c-found",
+              "leftValue": "={{ $json.invoice_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "c-notpaid",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "paid",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "6e9bc786-bdb9-43b1-8456-bc69ea489f6a",
+      "name": "Valid Unpaid Invoice?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -224,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://docdata.app.n8n.cloud/webhook/invoice-paid?invoice_id={{ $json.invoice_id }}&company_id={{ $json.company_id }}",
+        "options": {}
+      },
+      "id": "07cb6a9a-3292-4159-b832-7045ae9d4095",
+      "name": "Mark Paid (via 08)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "PASTE_YOUR_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Events",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $now.toISO() }}",
+            "company_id": "={{ $('Find Invoice').first().json.company_id }}",
+            "workflow": "Stripe Payment",
+            "event_type": "stripe.payment_received",
+            "payload": "={{ JSON.stringify({ invoice_id: $('Extract Payment').first().json.invoice_id, amount: $('Extract Payment').first().json.amount_paid, payer: $('Extract Payment').first().json.payer_email }) }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "4a110077-b7e5-4637-9d39-bdf20e099d9c",
+      "name": "Log Stripe Event",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        224,
+        0
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#opc-alerts",
+          "mode": "name"
+        },
+        "text": "={{ '⚠️ *Stripe payment received with NO matching open invoice* — session ' + $('Extract Payment').first().json.stripe_session + ', payer ' + $('Extract Payment').first().json.payer_email + ', ref \"' + $('Extract Payment').first().json.invoice_id + '\", amount $' + $('Extract Payment').first().json.amount_paid + '. Investigate manually.' }}",
+        "otherOptions": {}
+      },
+      "id": "768efefc-de22-4697-a862-c8416b27dda6",
+      "name": "Alert Unmatched Payment",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        288
+      ],
+      "webhookId": "24a8b6d5-b9ba-429b-8480-4b555838631a",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "kN111tifvA4UnXvp",
+          "name": "Slack account 4"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Stripe Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Payment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Payment": {
+      "main": [
+        [
+          {
+            "node": "Find Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Invoice": {
+      "main": [
+        [
+          {
+            "node": "Valid Unpaid Invoice?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Valid Unpaid Invoice?": {
+      "main": [
+        [
+          {
+            "node": "Mark Paid (via 08)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Alert Unmatched Payment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Paid (via 08)": {
+      "main": [
+        [
+          {
+            "node": "Log Stripe Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "b26d47de-9853-47a5-8d1a-c2f5ab7d8901",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "57441320b70178d806e96b762a15bb75202665623bb949270cccba67ddc8527d"
+  },
+  "nodeGroups": [],
+  "id": "BRTYjC0zesibV5hh",
+  "tags": []
+}
