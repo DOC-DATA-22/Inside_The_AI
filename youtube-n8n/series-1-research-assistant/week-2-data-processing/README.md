@@ -30,4 +30,4 @@ You'll see three labeled stages — fetch → dedup → score — then clean JSO
 Structured data = data with a **shape** (fields), not a blob. `title`, `source`, `score`, `why` —
 that shape is what lets a program (or next week's UI) actually use it.
 
-**Stuck?** [Troubleshooting](../../docs/troubleshooting.md) · **Next:** [Week 3 — your own ChatGPT](../week-3-chat-ui/)
+**Stuck?** [Troubleshooting](../../../docs/troubleshooting.md) · **Next:** [Week 3 — your own ChatGPT](../week-3-chat-ui/)

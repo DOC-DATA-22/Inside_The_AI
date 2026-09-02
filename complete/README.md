@@ -1,7 +1,7 @@
 # The Complete Build — Grab & Go
 
 The finished Series 1 assistant, in one folder, for people who want the end result now.
-(You'll understand it better doing [the weeks](../series-1-research-assistant/). Just saying.)
+(You'll understand it better doing [the weeks](../youtube-n8n/series-1-research-assistant/). Just saying.)
 
 **Needs:** a [free Gemini key](../docs/get-gemini-api-key.md) · Python 3.10+ · an n8n account or self-host
 

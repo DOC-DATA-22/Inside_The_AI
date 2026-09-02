@@ -34,4 +34,4 @@ Open this folder in an AI coding tool (the videos use Claude Code) and ask for c
 English — "change the header title," "make the accent color blue." Watch English become code
 become result.
 
-**Stuck?** [Troubleshooting](../../docs/troubleshooting.md) · **Next:** [Week 4 — connect everything](../week-4-connect/)
+**Stuck?** [Troubleshooting](../../../docs/troubleshooting.md) · **Next:** [Week 4 — connect everything](../week-4-connect/)

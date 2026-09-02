@@ -38,7 +38,7 @@ Your agent answers, inside your app. **Done — that's the assistant.**
 Your app POSTs the message to the webhook — a URL your agent publishes. The agent runs and sends
 the answer back. That request-and-response is what an **API call** is. That's the whole trick.
 
-**Stuck?** [Troubleshooting](../../docs/troubleshooting.md)
+**Stuck?** [Troubleshooting](../../../docs/troubleshooting.md)
 
-**What's next:** this app now lives on as the [**Assistant Hub**](../../assistant-hub/) —
+**What's next:** this app now lives on as the [**Assistant Hub**](../../../assistant-hub/) —
 the channel's home app. Series 2 adds its agent to the same hub. Your assistant grows.

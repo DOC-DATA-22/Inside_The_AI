@@ -2,7 +2,7 @@
 
 **You build:** an agent that reads trending AI news every morning and drafts the top story,
 three angles, and a 60–90s Short script.
-**Time:** ~15 minutes · **Needs:** a [free Gemini key](../../docs/get-gemini-api-key.md)
+**Time:** ~15 minutes · **Needs:** a [free Gemini key](../../../docs/get-gemini-api-key.md)
 
 ## Path A — n8n (no-code)
 
@@ -14,7 +14,7 @@ three angles, and a 60–90s Short script.
 5. Click **Research Agent** → **Execute node** → top story + 3 angles + a Short script.
 6. Toggle the workflow **Active** — it now runs every morning at 7am by itself.
 
-*Where the news comes from and why: [news sources & data](../../docs/news-sources-and-data.md).*
+*Where the news comes from and why: [news sources & data](../../../docs/news-sources-and-data.md).*
 
 ## Path B — Python
 
@@ -36,4 +36,4 @@ python agent.py
 | `python/requirements.txt` | the three libraries it needs |
 | `python/.env.example` | template for your key (copy to `.env`) |
 
-**Stuck?** [Troubleshooting](../../docs/troubleshooting.md) · **Next:** [Week 2 — clean data](../week-2-data-processing/)
+**Stuck?** [Troubleshooting](../../../docs/troubleshooting.md) · **Next:** [Week 2 — clean data](../week-2-data-processing/)
