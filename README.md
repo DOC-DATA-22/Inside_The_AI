@@ -4,38 +4,49 @@
 
 **The official home of the Inside the AI YouTube channel, hosted by The Data Doc.**
 
-This channel has one mission: help you build **your own AI assistant** — a chat app you own,
-with a growing team of specialized agents behind it. Every series on the channel adds one
-agent. This repo holds everything: the app, the agents, and the step-by-step guides.
+This repo holds everything the channel builds, in three tracks:
+
+1. 🧩 **n8n builds** — agents and automation systems you can import and run, no code required
+2. 🤖 **Claude Code integrations** — level up Claude Code by pairing it with tools you already use
+3. 🔥 **Trending GitHub reviews** — hands-on reviews of the hottest repos on GitHub
 
 ▶ **Watch:** search "Inside the AI podcast" on YouTube
 
 ---
 
-## 🗺 The big picture
+## 🗺 The three tracks
 
 ```
-        YOUR ASSISTANT HUB  (a chat app you own — like ChatGPT, but yours)
-                                      │
-        ┌─────────────────────────────┼─────────────────────────────┐
-        │                             │                             │
-  🔎 Research Agent            🗓 Productivity Agent          📊 Data Analyst Agent
-   Series 1 ✅ Live              Series 2 🔜 Vote now           Series 3 🔜 Planned
+                          INSIDE THE AI
+                                │
+        ┌───────────────────────┼───────────────────────┐
+        │                       │                       │
+  🧩 n8n Builds          🤖 Claude Code            🔥 GitHub Reviews
+   01-youtube/            Integrations              03-youtube-
+   agents, workflows,     02-youtube-claude-        github-review/
+   full business OS       code-improvement-docs/    coming soon
 ```
 
-Full plan: **[The Channel Roadmap](docs/channel-roadmap.md)**
+| Track | Folder | What's inside |
+|-------|--------|---------------|
+| **n8n builds** | [`01-youtube/`](01-youtube/) | What Is an Agent session, the One-Person Company OS, and the Series 1–3 assistant builds |
+| **Claude Code integrations** | [`02-youtube-claude-code-improvement-docs/`](02-youtube-claude-code-improvement-docs/) | Script docs for the Claude Code Improvement playlist (Obsidian, NotebookLM) |
+| **GitHub reviews** | [`03-youtube-github-review/`](03-youtube-github-review/) | Reviews of trending GitHub repos — content coming soon |
 
 ---
 
 ## 🚀 Start here
 
-1. **[Get your free Gemini API key](docs/get-gemini-api-key.md)** — 3 minutes, no credit card.
-2. **[Series 1, Week 1](01-youtube/series-1-research-assistant/week-1-agent/)** — build your first agent.
-3. By Series 1, Week 4, you'll be running the **[Assistant Hub](assistant-hub/)** with your
-   agent inside it.
+- **New to agents?** [What Is an AI Agent? — The 3 Levels of AI](01-youtube/03-what-is-an-agent/)
+- **Want to build one?** [Get a free Gemini API key](docs/get-gemini-api-key.md), then start
+  [Series 1, Week 1](01-youtube/series-1-research-assistant/week-1-agent/).
+- **Want the finished build now?** The [`complete/`](complete/) folder is grab-and-go, and the
+  [Assistant Hub](assistant-hub/) is the chat app it all plugs into.
+- **Using Claude Code?** The [Claude Code Improvement scripts](02-youtube-claude-code-improvement-docs/)
+  show how to pair it with Obsidian and NotebookLM.
 
-**In a hurry?** The [`complete/`](complete/) folder is the finished Series 1 build, grab-and-go.
-**Prefer Word docs?** Every guide is also in [`docs/word-guides/`](docs/word-guides/).
+**Prefer Word docs?** Series 1 guides are also in [`docs/word-guides/`](docs/word-guides/).
+Full plan: **[The Channel Roadmap](docs/channel-roadmap.md)**
 
 ---
 
@@ -43,15 +54,15 @@ Full plan: **[The Channel Roadmap](docs/channel-roadmap.md)**
 
 | Folder | What it is |
 |--------|-----------|
-| [`assistant-hub/`](assistant-hub/) | **The app everything plugs into** — your own ChatGPT |
 | [`01-youtube/03-what-is-an-agent/`](01-youtube/03-what-is-an-agent/) | Session: **What Is an AI Agent? — The 3 Levels of AI** (deck + n8n workflow) |
 | [`01-youtube/04-one-person-company-os/`](01-youtube/04-one-person-company-os/) | Episode 1: **The One-Person Company OS** — n8n + Google Sheets + Claude business automation (workflows + script) |
 | [`01-youtube/series-1-research-assistant/`](01-youtube/series-1-research-assistant/) | Series 1, week by week: the research agent |
 | [`01-youtube/series-2-productivity-agent/`](01-youtube/series-2-productivity-agent/) | Series 2 (planning — vote on the channel) |
 | [`01-youtube/series-3-data-analyst-agent/`](01-youtube/series-3-data-analyst-agent/) | Series 3 (planned) |
 | [`02-youtube-claude-code-improvement-docs/`](02-youtube-claude-code-improvement-docs/) | YouTube playlist: **Claude Code Improvement** — script documents for the Obsidian & NotebookLM videos |
-| [`03-youtube-github-review/`](03-youtube-github-review/) | YouTube: **GitHub Review** — placeholder, content coming soon |
-| [`complete/`](complete/) | The finished current build, one folder, grab-and-go |
+| [`03-youtube-github-review/`](03-youtube-github-review/) | YouTube: **GitHub Review** — trending repo reviews, coming soon |
+| [`assistant-hub/`](assistant-hub/) | The chat app the n8n series build toward — your own ChatGPT |
+| [`complete/`](complete/) | The finished Series 1 build, one folder, grab-and-go |
 | [`docs/`](docs/) | API key guide · news sources & data · troubleshooting · roadmap |
 
 ---
@@ -60,11 +71,8 @@ Full plan: **[The Channel Roadmap](docs/channel-roadmap.md)**
 
 A chatbot answers from what it already knows. An **agent** decides to *use tools* — get new
 information, act, and answer with the result. Every agent on this channel is four parts:
-**Model · Instructions · Tools · Loop.** Learn it once in Series 1; reuse it forever.
-
-Two build paths, every week of every series:
-- 🧩 **n8n** — visual, no-code (the main path)
-- 🐍 **Python** — the same agent in readable code
+**Model · Instructions · Tools · Loop.** Learn it once; reuse it everywhere — in n8n, in
+Claude Code, and in the repos we review.
 
 ## 🔐 Keys & safety
 No API keys live in this repo — `.env.example` files hold placeholders only. Guides show you how
