@@ -46,7 +46,7 @@ Full plan: **[The Channel Roadmap](docs/channel-roadmap.md)**
 | [`assistant-hub/`](assistant-hub/) | **The app everything plugs into** — your own ChatGPT |
 | [`youtube-n8n/03-what-is-an-agent/`](youtube-n8n/03-what-is-an-agent/) | Session: **What Is an AI Agent? — The 3 Levels of AI** (deck + n8n workflow) |
 | [`youtube-n8n/04-one-person-company-os/`](youtube-n8n/04-one-person-company-os/) | Episode 1: **The One-Person Company OS** — n8n + Google Sheets + Claude business automation (workflows + script) |
-| [`05-youtube-claude-code-improvement-docs/`](05-youtube-claude-code-improvement-docs/) | YouTube playlist: **Claude Code Improvement** — script documents for the Obsidian & NotebookLM videos |
+| [`youtube-n8n/05-youtube-claude-code-improvement-docs/`](youtube-n8n/05-youtube-claude-code-improvement-docs/) | YouTube playlist: **Claude Code Improvement** — script documents for the Obsidian & NotebookLM videos |
 | [`youtube-n8n/series-1-research-assistant/`](youtube-n8n/series-1-research-assistant/) | Series 1, week by week: the research agent |
 | [`youtube-n8n/series-2-productivity-agent/`](youtube-n8n/series-2-productivity-agent/) | Series 2 (planning — vote on the channel) |
 | [`youtube-n8n/series-3-data-analyst-agent/`](youtube-n8n/series-3-data-analyst-agent/) | Series 3 (planned) |
