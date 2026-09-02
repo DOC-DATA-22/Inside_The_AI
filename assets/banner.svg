@@ -1,0 +1,63 @@
+<svg width="1280" height="640" viewBox="0 0 1280 640" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1b0f21"/>
+      <stop offset="0.55" stop-color="#31203c"/>
+      <stop offset="1" stop-color="#241528"/>
+    </linearGradient>
+  </defs>
+
+  <!-- background -->
+  <rect width="1280" height="640" fill="url(#bg)"/>
+
+  <!-- star dots -->
+  <g fill="#8a6f96" opacity="0.5">
+    <circle cx="80" cy="76" r="3"/>
+    <circle cx="200" cy="60" r="2"/>
+    <circle cx="60" cy="320" r="2.5"/>
+    <circle cx="125" cy="520" r="3"/>
+    <circle cx="700" cy="70" r="2"/>
+    <circle cx="1220" cy="300" r="2.5"/>
+    <circle cx="1100" cy="90" r="2"/>
+    <circle cx="640" cy="500" r="2"/>
+  </g>
+
+  <!-- eyebrow -->
+  <text x="90" y="126" fill="#e0408c" font-size="30" font-weight="bold" letter-spacing="14">INSIDE THE AI</text>
+
+  <!-- title -->
+  <text x="86" y="215" fill="#ffffff" font-size="76" font-weight="bold">One Channel.</text>
+  <text x="86" y="300" fill="#ffffff" font-size="76" font-weight="bold">Three Tracks.</text>
+
+  <!-- underline -->
+  <rect x="90" y="326" width="330" height="7" rx="3.5" fill="#d63384"/>
+
+  <!-- subtitle -->
+  <text x="90" y="382" fill="#cbb8d6" font-size="29">n8n builds  &#183;  Claude Code integrations  &#183;  GitHub reviews</text>
+
+  <!-- connectors -->
+  <g stroke="#d63384" stroke-width="2" fill="none" opacity="0.85">
+    <line x1="1010" y1="186" x2="1035" y2="225"/>
+    <line x1="1035" y1="311" x2="1010" y2="350"/>
+  </g>
+
+  <!-- track 1: n8n builds -->
+  <rect x="860" y="100" width="300" height="86" rx="16" fill="#0f2b2b" stroke="#2ee6a8" stroke-width="2.5"/>
+  <text x="1010" y="138" text-anchor="middle" fill="#2ee6a8" font-size="26" font-weight="bold" letter-spacing="2">N8N BUILDS</text>
+  <text x="1010" y="168" text-anchor="middle" fill="#cfe9e0" font-size="19">agents &amp; a full business OS &#183; 01 &#183; live</text>
+
+  <!-- track 2: claude code -->
+  <rect x="885" y="225" width="300" height="86" rx="16" fill="#2b1430" stroke="#e0408c" stroke-width="2.5"/>
+  <text x="1035" y="263" text-anchor="middle" fill="#ffffff" font-size="26" font-weight="bold">Claude Code</text>
+  <text x="1035" y="293" text-anchor="middle" fill="#d9a8c4" font-size="19">integrations &amp; power-ups &#183; 02 &#183; live</text>
+
+  <!-- track 3: github reviews -->
+  <rect x="860" y="350" width="300" height="86" rx="16" fill="#241a2b" stroke="#8a7f92" stroke-width="2"/>
+  <text x="1010" y="388" text-anchor="middle" fill="#ffffff" font-size="26" font-weight="bold">GitHub Reviews</text>
+  <text x="1010" y="418" text-anchor="middle" fill="#a396ad" font-size="19">trending repos &#183; 03 &#183; soon</text>
+
+  <!-- footer bar -->
+  <rect x="0" y="560" width="1280" height="80" fill="#170d1c"/>
+  <text x="90" y="611" fill="#ffffff" font-size="28" font-weight="bold">github.com/DOC-DATA-22/Inside_The_AI</text>
+  <text x="1190" y="611" text-anchor="end" fill="#d63384" font-size="28" font-weight="bold">The Data Doc  &#62;</text>
+</svg>

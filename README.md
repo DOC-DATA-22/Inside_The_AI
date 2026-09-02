@@ -1,4 +1,4 @@
-![Inside the AI — Build Your Own AI Assistant](assets/banner.png)
+![Inside the AI — One Channel, Three Tracks: n8n builds, Claude Code integrations, GitHub reviews](assets/banner.svg)
 
 # Inside the AI — The Channel Repository
 
