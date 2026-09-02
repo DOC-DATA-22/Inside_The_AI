@@ -45,7 +45,7 @@ Full plan: **[The Channel Roadmap](docs/channel-roadmap.md)**
 |--------|-----------|
 | [`assistant-hub/`](assistant-hub/) | **The app everything plugs into** — your own ChatGPT |
 | [`03-what-is-an-agent/`](03-what-is-an-agent/) | Session: **What Is an AI Agent? — The 3 Levels of AI** (deck + n8n workflow) |
-| [`05-claude-code-improvement/`](05-claude-code-improvement/) | Playlist: **Claude Code Improvement** — scripts for the Obsidian & NotebookLM videos |
+| [`05-youtube-claude-code-improvement-docs/`](05-youtube-claude-code-improvement-docs/) | YouTube playlist: **Claude Code Improvement** — script documents for the Obsidian & NotebookLM videos |
 | [`series-1-research-assistant/`](series-1-research-assistant/) | Series 1, week by week: the research agent |
 | [`series-2-productivity-agent/`](series-2-productivity-agent/) | Series 2 (planning — vote on the channel) |
 | [`series-3-data-analyst-agent/`](series-3-data-analyst-agent/) | Series 3 (planned) |
