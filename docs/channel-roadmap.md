@@ -7,9 +7,9 @@ with a growing team of specialized agents behind it.
 
 | Series | Agent | Skill your assistant gains | Status |
 |--------|-------|---------------------------|--------|
-| 1 | [Research agent](../youtube-n8n/series-1-research-assistant/) | reads trending AI news, drafts takes | ✅ Live |
-| 2 | [Productivity agent](../youtube-n8n/series-2-productivity-agent/) | calendar / email / tasks (your vote) | 🔜 Planning |
-| 3 | [Data analyst agent](../youtube-n8n/series-3-data-analyst-agent/) | answers questions about your own data | 🔜 Planned |
+| 1 | [Research agent](../01-youtube/series-1-research-assistant/) | reads trending AI news, drafts takes | ✅ Live |
+| 2 | [Productivity agent](../01-youtube/series-2-productivity-agent/) | calendar / email / tasks (your vote) | 🔜 Planning |
+| 3 | [Data analyst agent](../01-youtube/series-3-data-analyst-agent/) | answers questions about your own data | 🔜 Planned |
 | — | More decided with the audience | — | 💬 Comment on the channel |
 
 ## The rules every series follows
