@@ -43,7 +43,6 @@ This repo holds everything the channel builds, in three tracks:
 - **Using Claude Code?** The [Claude Code Improvement scripts](02-youtube-claude-code-improvement-docs/)
   show how to pair it with Obsidian and NotebookLM.
 
-**Prefer Word docs?** Series 1 guides are also in [`docs/word-guides/`](docs/word-guides/).
 Full plan: **[The Channel Roadmap](docs/channel-roadmap.md)**
 
 ---
