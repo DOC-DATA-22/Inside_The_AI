@@ -50,6 +50,7 @@ Full plan: **[The Channel Roadmap](docs/channel-roadmap.md)**
 | [`01-youtube/series-2-productivity-agent/`](01-youtube/series-2-productivity-agent/) | Series 2 (planning — vote on the channel) |
 | [`01-youtube/series-3-data-analyst-agent/`](01-youtube/series-3-data-analyst-agent/) | Series 3 (planned) |
 | [`02-youtube-claude-code-improvement-docs/`](02-youtube-claude-code-improvement-docs/) | YouTube playlist: **Claude Code Improvement** — script documents for the Obsidian & NotebookLM videos |
+| [`03-youtube-github-review/`](03-youtube-github-review/) | YouTube: **GitHub Review** — placeholder, content coming soon |
 | [`complete/`](complete/) | The finished current build, one folder, grab-and-go |
 | [`docs/`](docs/) | API key guide · news sources & data · troubleshooting · roadmap |
 
