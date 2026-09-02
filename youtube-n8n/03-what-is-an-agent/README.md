@@ -2,7 +2,7 @@
 
 **The one-sentence takeaway:** An LLM answers. A workflow follows. An agent decides.
 
-**Needs:** a [free Gemini key](../docs/get-gemini-api-key.md) · Gmail + Google Calendar
+**Needs:** a [free Gemini key](../../docs/get-gemini-api-key.md) · Gmail + Google Calendar
 credentials are optional (Level 3 only)
 
 ## Files here
@@ -22,7 +22,7 @@ credentials are optional (Level 3 only)
 
 ## Setup — how to run it
 
-1. Get a [free Gemini API key](../docs/get-gemini-api-key.md) (Google AI Studio) and add it
+1. Get a [free Gemini API key](../../docs/get-gemini-api-key.md) (Google AI Studio) and add it
    as a **Google Gemini** credential in n8n.
 2. Import the JSON from the n8n **Workflows list** → **Import from File** — *not* by pasting
    onto an open canvas.
@@ -41,4 +41,4 @@ credentials are optional (Level 3 only)
 - Free-tier Gemini has rate limits: if it pauses, wait a moment and retry.
 - Only grant the access you'd give a new intern.
 
-**Stuck?** [Troubleshooting](../docs/troubleshooting.md)
+**Stuck?** [Troubleshooting](../../docs/troubleshooting.md)
