@@ -22,14 +22,14 @@ This repo holds everything the channel builds, in three tracks:
         ┌───────────────────────┼───────────────────────┐
         │                       │                       │
   🧩 n8n Builds          🤖 Claude Code            🔥 GitHub Reviews
-   01-youtube/            Integrations              03-youtube-
+   01-youtube-n8n/            Integrations              03-youtube-
    agents, workflows,     02-youtube-claude-        github-review/
    full business OS       code-improvement-docs/    coming soon
 ```
 
 | Track | Folder | What's inside |
 |-------|--------|---------------|
-| **n8n builds** | [`01-youtube/`](01-youtube/) | What Is an Agent session, the One-Person Company OS, and the Series 1–3 assistant builds |
+| **n8n builds** | [`01-youtube-n8n/`](01-youtube-n8n/) | What Is an Agent session, the One-Person Company OS, and the Series 1–3 assistant builds |
 | **Claude Code integrations** | [`02-youtube-claude-code-improvement-docs/`](02-youtube-claude-code-improvement-docs/) | Script docs for the Claude Code Improvement playlist (Obsidian, NotebookLM) |
 | **GitHub reviews** | [`03-youtube-github-review/`](03-youtube-github-review/) | Reviews of trending GitHub repos — content coming soon |
 
@@ -37,11 +37,9 @@ This repo holds everything the channel builds, in three tracks:
 
 ## 🚀 Start here
 
-- **New to agents?** [What Is an AI Agent? — The 3 Levels of AI](01-youtube/03-what-is-an-agent/)
+- **New to agents?** [What Is an AI Agent? — The 3 Levels of AI](01-youtube-n8n/03-what-is-an-agent/)
 - **Want to build one?** [Get a free Gemini API key](docs/get-gemini-api-key.md), then start
-  [Series 1, Week 1](01-youtube/series-1-research-assistant/week-1-agent/).
-- **Want the finished build now?** The [`complete/`](complete/) folder is grab-and-go, and the
-  [Assistant Hub](assistant-hub/) is the chat app it all plugs into.
+  [Series 1, Week 1](01-youtube-n8n/series-1-research-assistant/week-1-agent/).
 - **Using Claude Code?** The [Claude Code Improvement scripts](02-youtube-claude-code-improvement-docs/)
   show how to pair it with Obsidian and NotebookLM.
 
@@ -54,15 +52,13 @@ Full plan: **[The Channel Roadmap](docs/channel-roadmap.md)**
 
 | Folder | What it is |
 |--------|-----------|
-| [`01-youtube/03-what-is-an-agent/`](01-youtube/03-what-is-an-agent/) | Session: **What Is an AI Agent? — The 3 Levels of AI** (deck + n8n workflow) |
-| [`01-youtube/04-one-person-company-os/`](01-youtube/04-one-person-company-os/) | Episode 1: **The One-Person Company OS** — n8n + Google Sheets + Claude business automation (workflows + script) |
-| [`01-youtube/series-1-research-assistant/`](01-youtube/series-1-research-assistant/) | Series 1, week by week: the research agent |
-| [`01-youtube/series-2-productivity-agent/`](01-youtube/series-2-productivity-agent/) | Series 2 (planning — vote on the channel) |
-| [`01-youtube/series-3-data-analyst-agent/`](01-youtube/series-3-data-analyst-agent/) | Series 3 (planned) |
+| [`01-youtube-n8n/03-what-is-an-agent/`](01-youtube-n8n/03-what-is-an-agent/) | Session: **What Is an AI Agent? — The 3 Levels of AI** (deck + n8n workflow) |
+| [`01-youtube-n8n/04-one-person-company-os/`](01-youtube-n8n/04-one-person-company-os/) | Episode 1: **The One-Person Company OS** — n8n + Google Sheets + Claude business automation (workflows + script) |
+| [`01-youtube-n8n/series-1-research-assistant/`](01-youtube-n8n/series-1-research-assistant/) | Series 1, week by week: the research agent |
+| [`01-youtube-n8n/series-2-productivity-agent/`](01-youtube-n8n/series-2-productivity-agent/) | Series 2 (planning — vote on the channel) |
+| [`01-youtube-n8n/series-3-data-analyst-agent/`](01-youtube-n8n/series-3-data-analyst-agent/) | Series 3 (planned) |
 | [`02-youtube-claude-code-improvement-docs/`](02-youtube-claude-code-improvement-docs/) | YouTube playlist: **Claude Code Improvement** — script documents for the Obsidian & NotebookLM videos |
 | [`03-youtube-github-review/`](03-youtube-github-review/) | YouTube: **GitHub Review** — trending repo reviews, coming soon |
-| [`assistant-hub/`](assistant-hub/) | The chat app the n8n series build toward — your own ChatGPT |
-| [`complete/`](complete/) | The finished Series 1 build, one folder, grab-and-go |
 | [`docs/`](docs/) | API key guide · news sources & data · troubleshooting · roadmap |
 
 ---

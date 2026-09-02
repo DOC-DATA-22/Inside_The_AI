@@ -19,4 +19,4 @@ Our version drops Telegram delivery, uses free Gemini, and adds the hot-take pro
 Every week has two paths — **n8n (no-code)** and **Python** — that build the same thing.
 
 **Where this series ends:** the chat app you build in Weeks 3–4 lives on as the channel's
-[**Assistant Hub**](../../assistant-hub/) — the same app every future series adds an agent to.
+**Assistant Hub** — the same app every future series adds an agent to.

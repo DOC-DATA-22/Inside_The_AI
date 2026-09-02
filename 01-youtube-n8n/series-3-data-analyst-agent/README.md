@@ -7,4 +7,4 @@ answers questions about it in plain English. "What were my top expenses last mon
 a chat message, not an hour in Excel.
 
 Same format as every series: 4 weeks, n8n + Python, ends plugged into your
-[Assistant Hub](../../assistant-hub/).
+Assistant Hub.

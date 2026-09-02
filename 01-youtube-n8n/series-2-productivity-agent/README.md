@@ -2,7 +2,7 @@
 
 **Status: in planning — your vote decides the details.**
 
-The second skill for your [Assistant Hub](../../assistant-hub/): an agent for the boring parts of
+The second skill for your Assistant Hub: an agent for the boring parts of
 your day. Candidate powers (comment on the channel to vote):
 
 - 🗓 Calendar: "what's my day look like?" / "find me an hour for deep work"
