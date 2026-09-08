@@ -29,7 +29,7 @@ This repo holds everything the channel builds, in three tracks:
 
 | Track | Folder | What's inside |
 |-------|--------|---------------|
-| **n8n builds** | [`01-youtube-n8n/`](01-youtube-n8n/) | What Is an Agent session, the One-Person Company OS, and the Series 1–3 assistant builds |
+| **n8n builds** | [`01-youtube-n8n/`](01-youtube-n8n/) | What Is an Agent session, the One-Person Company OS, the Agentic RAG Agent, and the Series 1–3 assistant builds |
 | **Claude Code integrations** | [`02-youtube-claude-code-improvement-docs/`](02-youtube-claude-code-improvement-docs/) | Script docs for the Claude Code Improvement playlist (Obsidian, NotebookLM) |
 | **GitHub reviews** | [`03-youtube-github-review/`](03-youtube-github-review/) | Reviews of trending GitHub repos — content coming soon |
 
@@ -53,6 +53,7 @@ Full plan: **[The Channel Roadmap](docs/channel-roadmap.md)**
 |--------|-----------|
 | [`01-youtube-n8n/03-what-is-an-agent/`](01-youtube-n8n/03-what-is-an-agent/) | Session: **What Is an AI Agent? — The 3 Levels of AI** (deck + n8n workflow) |
 | [`01-youtube-n8n/04-one-person-company-os/`](01-youtube-n8n/04-one-person-company-os/) | Episode 1: **The One-Person Company OS** — n8n + Google Sheets + Claude business automation (workflows + script) |
+| [`01-youtube-n8n/05-agentic-rag-agent/`](01-youtube-n8n/05-agentic-rag-agent/) | **Agentic RAG Agent** — Google Drive + MongoDB Atlas + OpenAI: watches a Drive folder, embeds documents into a vector store, answers questions with tools (workflows + setup guide) |
 | [`01-youtube-n8n/series-1-research-assistant/`](01-youtube-n8n/series-1-research-assistant/) | Series 1, week by week: the research agent |
 | [`01-youtube-n8n/series-2-productivity-agent/`](01-youtube-n8n/series-2-productivity-agent/) | Series 2 (planning — vote on the channel) |
 | [`01-youtube-n8n/series-3-data-analyst-agent/`](01-youtube-n8n/series-3-data-analyst-agent/) | Series 3 (planned) |

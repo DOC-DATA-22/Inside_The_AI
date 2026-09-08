@@ -1,0 +1,1266 @@
+{
+  "name": "Agentic RAG Agent - Google Drive + MongoDB Atlas + OpenAI",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 1. Ingestion (runs automatically)\nDrop a file into the watched Google Drive folder and the two triggers fire. Supported: PDF, CSV, XLSX, TXT, Google Docs (converted to text) and Google Sheets (converted to CSV).\n\nEvery run: upsert the file's metadata, wipe any old chunks and rows for that file, download it, route by type, then embed into MongoDB Atlas.\n\n**Setup:** pick your watched folder on both triggers, select your Google Drive credential on the triggers and the Download node, and select **MongoDB account 2** on every MongoDB node.",
+        "height": 300,
+        "width": 620,
+        "color": 4
+      },
+      "id": "a6956c73-1e97-4349-aade-29b50c581c18",
+      "name": "Sticky Note 0",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4416,
+        2512
+      ]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_DRIVE_FOLDER_ID",
+          "mode": "list",
+          "cachedResultName": "YOUR_GOOGLE_DRIVE_FOLDER_ID",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/YOUR_GOOGLE_DRIVE_FOLDER_ID"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "id": "f394ea8a-4d5d-4503-9bd4-db40f1f074b5",
+      "name": "File Created",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        4416,
+        2896
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "VmJLB3etKNOGqaUy",
+          "name": "Google Drive account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_DRIVE_FOLDER_ID",
+          "mode": "list",
+          "cachedResultName": "YOUR_GOOGLE_DRIVE_FOLDER_ID",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/YOUR_GOOGLE_DRIVE_FOLDER_ID"
+        },
+        "event": "fileUpdated",
+        "options": {}
+      },
+      "id": "c9f98a4e-736c-4272-9ca7-630c99d9d3ec",
+      "name": "File Updated",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        4416,
+        3120
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "VmJLB3etKNOGqaUy",
+          "name": "Google Drive account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "14d79295-fa66-49f8-b5bd-85c9f768936b",
+              "name": "file_id",
+              "type": "string",
+              "value": "={{ $json.id }}"
+            },
+            {
+              "id": "81b348ad-b088-49ed-a529-857244320e44",
+              "name": "file_type",
+              "type": "string",
+              "value": "={{ ({'application/pdf':'pdf','text/csv':'csv','application/vnd.google-apps.spreadsheet':'csv','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':'xlsx','application/vnd.ms-excel':'xlsx','application/vnd.google-apps.document':'txt','text/plain':'txt'})[$json.mimeType] || $json.name.split('.').pop().toLowerCase() }}"
+            },
+            {
+              "id": "8e2ca99d-0165-437c-97be-48ca48b234bf",
+              "name": "title",
+              "type": "string",
+              "value": "={{ $json.name }}"
+            },
+            {
+              "id": "65f48781-5cd8-4fb1-936b-9b482c270053",
+              "name": "url",
+              "type": "string",
+              "value": "={{ $json.webViewLink || '' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8bfaf97b-36bb-471a-9273-dca065fa78e8",
+      "name": "Set File ID",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4656,
+        2992
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "collection": "doc_metadata",
+        "updateKey": "file_id",
+        "fields": "file_id,title,url,file_type",
+        "upsert": true,
+        "options": {}
+      },
+      "id": "0a68565f-63f1-467a-868a-74298a50b892",
+      "name": "Upsert Document Metadata",
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.2,
+      "position": [
+        4880,
+        2992
+      ],
+      "credentials": {
+        "mongoDb": {
+          "id": "XvgT9v1YDUc8IdZX",
+          "name": "MongoDB account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "collection": "local_docs",
+        "query": "={\"file_id\": \"{{ $('Set File ID').first().json.file_id }}\"}"
+      },
+      "id": "2cd4df76-2847-44d8-929a-b782946ee468",
+      "name": "Delete Old Doc Chunks",
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.2,
+      "position": [
+        5104,
+        2992
+      ],
+      "credentials": {
+        "mongoDb": {
+          "id": "XvgT9v1YDUc8IdZX",
+          "name": "MongoDB account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "collection": "doc_rows",
+        "query": "={\"file_id\": \"{{ $('Set File ID').first().json.file_id }}\"}"
+      },
+      "id": "f227ff29-7fa5-4de9-bf74-eaf3eab5ee16",
+      "name": "Delete Old Data Rows",
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.2,
+      "position": [
+        5328,
+        2992
+      ],
+      "credentials": {
+        "mongoDb": {
+          "id": "XvgT9v1YDUc8IdZX",
+          "name": "MongoDB account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Set File ID').first().json.file_id }}"
+        },
+        "options": {
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "text/plain"
+            }
+          }
+        }
+      },
+      "id": "4c71158a-92a3-46c1-a9d0-ae623530cd44",
+      "name": "Download File",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        5536,
+        2992
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "VmJLB3etKNOGqaUy",
+          "name": "Google Drive account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "e61276fe-fd53-496e-bed9-708d2fe52f46",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('Set File ID').first().json.file_type }}",
+                    "rightValue": "pdf"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "pdf"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "0865c810-fe31-4566-a711-8e93a3a1851a",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('Set File ID').first().json.file_type }}",
+                    "rightValue": "xlsx"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "xlsx"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "8c58fcdd-d3d5-4489-826b-e05ede776a3c",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('Set File ID').first().json.file_type }}",
+                    "rightValue": "csv"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "csv"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "e2352827-d3ae-4a2e-a101-f323233ba701",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('Set File ID').first().json.file_type }}",
+                    "rightValue": "txt"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "txt"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": 3
+        }
+      },
+      "id": "f8055973-fb9b-472e-a576-ac4b7ec0dba2",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        5760,
+        2992
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "id": "8d5605e6-1e31-4e50-a9bd-391484371c35",
+      "name": "Extract PDF Text",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        6016,
+        2720
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "id": "dce65bd4-2952-4889-803d-4e9a9425f594",
+      "name": "Extract from Excel",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        6016,
+        2896
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "8988a289-7e8f-4e87-a64d-ef6ff2543c28",
+      "name": "Extract from CSV",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        6016,
+        3072
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "id": "e9026ee4-3913-47e0-b8e8-4e912c87a975",
+      "name": "Extract Document Text",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        6016,
+        3248
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c200a991-92ed-45db-bff3-7a3c6d9a783e",
+              "name": "file_id",
+              "type": "string",
+              "value": "={{ $('Set File ID').first().json.file_id }}"
+            },
+            {
+              "id": "09218f9f-f6e5-4a4b-a5d5-f1edc75f30ea",
+              "name": "row_data",
+              "type": "object",
+              "value": "={{ $json }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d30fcb62-d986-4f03-bbed-dbde5e75937c",
+      "name": "Build Row Records",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        6288,
+        2800
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "collection": "doc_rows",
+        "fields": "file_id,row_data",
+        "options": {}
+      },
+      "id": "cac1b2c0-0ede-4028-aa13-715a2b26ac79",
+      "name": "Insert Table Rows",
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.2,
+      "position": [
+        6496,
+        2800
+      ],
+      "credentials": {
+        "mongoDb": {
+          "id": "XvgT9v1YDUc8IdZX",
+          "name": "MongoDB account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "id": "327c17fd-7cfe-4a44-b79e-0ea26e5c1019",
+      "name": "Aggregate",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        6288,
+        2976
+      ]
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "concatenate",
+              "field": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f7abc473-682d-4f9a-ba45-38ae560cae48",
+      "name": "Summarize",
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1,
+      "position": [
+        6496,
+        2976
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "36d20547-cae3-49fa-939f-27338f9cd57b",
+              "name": "file_id",
+              "type": "string",
+              "value": "={{ $('Set File ID').first().json.file_id }}"
+            },
+            {
+              "id": "f055ee49-cf2c-4d83-9722-4ced846a127f",
+              "name": "schema",
+              "type": "string",
+              "value": "={{ $('Extract from Excel').isExecuted ? $('Extract from Excel').first().json.keys().toJsonString() : $('Extract from CSV').first().json.keys().toJsonString() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "09b06575-48aa-4e70-a0bf-47a871287a44",
+      "name": "Set Schema",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        6720,
+        2880
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "collection": "doc_metadata",
+        "updateKey": "file_id",
+        "fields": "file_id,schema",
+        "upsert": true,
+        "options": {}
+      },
+      "id": "b6227722-069e-4651-b625-ab6016388d41",
+      "name": "Update Schema for Document Metadata",
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.2,
+      "position": [
+        6944,
+        2880
+      ],
+      "credentials": {
+        "mongoDb": {
+          "id": "XvgT9v1YDUc8IdZX",
+          "name": "MongoDB account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "mongoCollection": {
+          "__rl": true,
+          "mode": "list",
+          "value": "local_docs",
+          "cachedResultName": "local_docs"
+        },
+        "vectorIndexName": "local_docs_index",
+        "options": {}
+      },
+      "id": "8d378e52-1f12-48c9-8914-6f4ccbfed20f",
+      "name": "MongoDB Atlas Vector Store Insert",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreMongoDBAtlas",
+      "typeVersion": 1.1,
+      "position": [
+        6768,
+        3216
+      ],
+      "credentials": {
+        "mongoDb": {
+          "id": "XvgT9v1YDUc8IdZX",
+          "name": "MongoDB account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "2eb34c5f-9a72-4352-8ad2-2f1baa793b4c",
+      "name": "Embeddings OpenAI (ingest)",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        6640,
+        3360
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "xnkzlkbZn1dGcDby",
+          "name": "OpenAi account 6"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $json.data || $json.text || $json.concatenated_data }}",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "file_id",
+                "value": "={{ $('Set File ID').first().json.file_id }}"
+              },
+              {
+                "name": "file_title",
+                "value": "={{ $('Set File ID').first().json.title }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "eb6838b5-2157-4a4e-a420-f0a3dcda00a9",
+      "name": "Default Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [
+        6864,
+        3360
+      ]
+    },
+    {
+      "parameters": {
+        "chunkSize": 800,
+        "chunkOverlap": 100,
+        "options": {}
+      },
+      "id": "71ea4aa0-af83-4884-9562-c049dde45763",
+      "name": "Recursive Character Text Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        6896,
+        3536
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. The Agentic Agent\nOne AI Agent, four tools, and it decides at runtime which to call:\n- **searchDocuments** vector search (RAG) over chunks in `local_docs`\n- **listDocuments** what files exist (and the column schema for tabular files)\n- **getFileContents** pull the full text of one file when a snippet isn't enough\n- **queryDocumentRows** run a MongoDB aggregation over the rows of a CSV/XLSX for sums, averages, counts\n\nChat memory lives in `local_chat_history`. Open the chat panel at the bottom of the canvas to test.",
+        "height": 280,
+        "width": 620,
+        "color": 4
+      },
+      "id": "5533a38a-7c1a-48b2-bc8b-7a43e5fbc8c3",
+      "name": "Sticky Note 23",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4592,
+        3264
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "1be34b58-7e2f-415e-8179-e730308a7c5a",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        5760,
+        3840
+      ],
+      "webhookId": "33609da0-def9-4203-8ff0-ee156503ba94"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "You are a personal assistant who answers questions from a private corpus of documents stored in MongoDB. Documents are either text based (TXT, Google Docs, PDFs) or tabular (CSV or Excel files).\n\nYou have four tools:\n1. searchDocuments: semantic (RAG) search over document chunks in the local_docs collection. Each chunk has a file_id and file_title.\n2. listDocuments: lists every document in the knowledge base from the doc_metadata collection, including the file_id, title, file_type, and for tabular files a schema listing the column names.\n3. getFileContents: given a file_id, returns the full text of that document.\n4. queryDocumentRows: runs a MongoDB aggregation pipeline over the doc_rows collection for a tabular file. Each row document looks like { file_id: <id>, row_data: { <column>: <value> } }. Values are usually strings, so wrap numbers in $toDouble before doing math.\n\nAlways start with searchDocuments unless the user asks about a specific document or the question needs a calculation over tabular data (a sum, an average, a max, a count). For calculations, first call listDocuments to get the file_id and the column names, then build the pipeline for queryDocumentRows.\n\nIf searchDocuments doesn't answer the question, call listDocuments, pick the documents most likely to contain the answer, and use getFileContents to read them.\n\nCite the document title you used. If you can't find the answer, say so plainly. Never invent an answer."
+        }
+      },
+      "id": "f3b1764b-0399-4c18-a920-f19c37d68548",
+      "name": "RAG AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        6160,
+        3840
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "38e10aed-1ed5-43b5-96f8-2850979dc0c5",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        5952,
+        4080
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "xnkzlkbZn1dGcDby",
+          "name": "OpenAi account 6"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "collectionName": "local_chat_history",
+        "contextWindowLength": 10
+      },
+      "id": "5bf3efc5-a74a-40bf-901d-fffa9f1fca7c",
+      "name": "MongoDB Chat Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryMongoDbChat",
+      "typeVersion": 1,
+      "position": [
+        6128,
+        4080
+      ],
+      "credentials": {
+        "mongoDb": {
+          "id": "XvgT9v1YDUc8IdZX",
+          "name": "MongoDB account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "searchDocuments",
+        "toolDescription": "Semantic search over the chunks of every document in the knowledge base. Use this first for almost any question. Returns the most relevant text chunks with their file_id and file_title.",
+        "mongoCollection": {
+          "__rl": true,
+          "mode": "list",
+          "value": "local_docs",
+          "cachedResultName": "local_docs"
+        },
+        "vectorIndexName": "local_docs_index",
+        "topK": 6,
+        "options": {}
+      },
+      "id": "5c1c587f-f890-42ce-bdc9-04c6c95627da",
+      "name": "Search Documents",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreMongoDBAtlas",
+      "typeVersion": 1.1,
+      "position": [
+        6320,
+        4080
+      ],
+      "credentials": {
+        "mongoDb": {
+          "id": "XvgT9v1YDUc8IdZX",
+          "name": "MongoDB account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "88d0c9f5-23ec-49a2-b1c2-9058d827ecc8",
+      "name": "Embeddings OpenAI (agent)",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        6320,
+        4288
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "xnkzlkbZn1dGcDby",
+          "name": "OpenAi account 6"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Lists every document available in the knowledge base with its file_id, title, url, file_type, and, for CSV/XLSX files, a schema field listing the column names. Call this to find a file_id before using getFileContents or queryDocumentRows.",
+        "collection": "doc_metadata",
+        "options": {
+          "projection": "{\"_id\": 0}"
+        }
+      },
+      "id": "f3c0b1b7-aa45-45c0-8435-4d21782cf92e",
+      "name": "List Documents",
+      "type": "n8n-nodes-base.mongoDbTool",
+      "typeVersion": 1.2,
+      "position": [
+        6544,
+        4080
+      ],
+      "credentials": {
+        "mongoDb": {
+          "id": "XvgT9v1YDUc8IdZX",
+          "name": "MongoDB account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Given a file_id, returns the full text of that document by joining all of its chunks. Use this when a search snippet isn't enough and you need to read a whole document.",
+        "operation": "aggregate",
+        "collection": "local_docs",
+        "query": "=[{\"$match\": {\"file_id\": \"{{ $fromAI('file_id', 'The file_id of the document to read, from listDocuments or searchDocuments') }}\"}}, {\"$group\": {\"_id\": \"$file_id\", \"chunks\": {\"$push\": \"$text\"}}}, {\"$project\": {\"_id\": 0, \"document_text\": {\"$reduce\": {\"input\": \"$chunks\", \"initialValue\": \"\", \"in\": {\"$concat\": [\"$$value\", \" \", \"$$this\"]}}}}}]"
+      },
+      "id": "9d360bc2-e78e-4c74-af9f-71134a12e630",
+      "name": "Get File Contents",
+      "type": "n8n-nodes-base.mongoDbTool",
+      "typeVersion": 1.2,
+      "position": [
+        6768,
+        4080
+      ],
+      "credentials": {
+        "mongoDb": {
+          "id": "XvgT9v1YDUc8IdZX",
+          "name": "MongoDB account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Runs a MongoDB aggregation pipeline over the doc_rows collection to answer questions about tabular files (CSV, XLSX, Google Sheets). Use it for sums, averages, counts, maximums, or filtering rows.\n\nEvery document in doc_rows has this shape:\n{ \"file_id\": \"<the file_id from listDocuments>\", \"row_data\": { \"<column name>\": \"<value>\", ... } }\n\nColumn names come from the schema field in listDocuments. Values are stored as strings, so wrap numeric fields in $toDouble.\n\nAlways $match on file_id first. Pass the pipeline as a JSON array string.\n\nExample 1, average revenue:\n[{\"$match\": {\"file_id\": \"1AbC123\"}}, {\"$group\": {\"_id\": null, \"avg_revenue\": {\"$avg\": {\"$toDouble\": \"$row_data.revenue\"}}}}]\n\nExample 2, total sales per category:\n[{\"$match\": {\"file_id\": \"1AbC123\"}}, {\"$group\": {\"_id\": \"$row_data.category\", \"total_sales\": {\"$sum\": {\"$toDouble\": \"$row_data.sales\"}}}}, {\"$sort\": {\"total_sales\": -1}}]\n\nExample 3, first 20 rows:\n[{\"$match\": {\"file_id\": \"1AbC123\"}}, {\"$limit\": 20}, {\"$project\": {\"_id\": 0, \"row_data\": 1}}]",
+        "operation": "aggregate",
+        "collection": "doc_rows",
+        "query": "={{ $fromAI('pipeline', 'A MongoDB aggregation pipeline as a JSON array string. Must start with a $match on file_id.') }}"
+      },
+      "id": "a26c30fb-18c3-47c2-bb04-391b34b34764",
+      "name": "Query Document Rows",
+      "type": "n8n-nodes-base.mongoDbTool",
+      "typeVersion": 1.2,
+      "position": [
+        6992,
+        4080
+      ],
+      "credentials": {
+        "mongoDb": {
+          "id": "XvgT9v1YDUc8IdZX",
+          "name": "MongoDB account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## MongoDB Atlas setup (one time)\nSame cluster and credential as the RLHF workflow. Collections `local_docs`, `doc_metadata`, `doc_rows`, `local_chat_history` are created automatically on first insert, but create `local_docs` by hand first so you can build its index.\n\nCreate ONE Vector Search index on `rlhf_bot.local_docs` named **local_docs_index**:\n```\n{\n  \"fields\": [\n    { \"type\": \"vector\", \"path\": \"embedding\", \"numDimensions\": 1536, \"similarity\": \"cosine\" },\n    { \"type\": \"filter\", \"path\": \"file_id\" }\n  ]\n}\n```\nThat uses your last free-tier index slot.",
+        "height": 440,
+        "width": 620,
+        "color": 5
+      },
+      "id": "409ca620-7648-4c3a-ab04-7afae811a402",
+      "name": "Sticky Note 33",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4416,
+        2048
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c200a991-92ed-45db-bff3-7a3c6d9a783e",
+              "name": "file_id",
+              "type": "string",
+              "value": "={{ $('Set File ID').first().json.file_id }}"
+            },
+            {
+              "id": "09218f9f-f6e5-4a4b-a5d5-f1edc75f30ea",
+              "name": "row_data",
+              "type": "object",
+              "value": "={{ $json }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "575891d4-cf69-4bab-a3ea-c7e0cbad239d",
+      "name": "Build Row Records1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        6896,
+        3120
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "collection": "doc_rows",
+        "fields": "file_id,row_data",
+        "options": {}
+      },
+      "id": "49a5d53d-1b64-49b5-80bd-89eecca71a6a",
+      "name": "Insert Table Rows1",
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.2,
+      "position": [
+        7104,
+        3120
+      ],
+      "credentials": {
+        "mongoDb": {
+          "id": "XvgT9v1YDUc8IdZX",
+          "name": "MongoDB account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "File Created": {
+      "main": [
+        [
+          {
+            "node": "Set File ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "File Updated": {
+      "main": [
+        [
+          {
+            "node": "Set File ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set File ID": {
+      "main": [
+        [
+          {
+            "node": "Upsert Document Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Document Metadata": {
+      "main": [
+        [
+          {
+            "node": "Delete Old Doc Chunks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Old Doc Chunks": {
+      "main": [
+        [
+          {
+            "node": "Delete Old Data Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Old Data Rows": {
+      "main": [
+        [
+          {
+            "node": "Download File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download File": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Extract PDF Text",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract from Excel",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract from CSV",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract Document Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from Excel": {
+      "main": [
+        [
+          {
+            "node": "Build Row Records",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from CSV": {
+      "main": [
+        [
+          {
+            "node": "Build Row Records",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Row Records": {
+      "main": [
+        [
+          {
+            "node": "Insert Table Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize": {
+      "main": [
+        [
+          {
+            "node": "Set Schema",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "MongoDB Atlas Vector Store Insert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Schema": {
+      "main": [
+        [
+          {
+            "node": "Update Schema for Document Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract PDF Text": {
+      "main": [
+        [
+          {
+            "node": "MongoDB Atlas Vector Store Insert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Document Text": {
+      "main": [
+        [
+          {
+            "node": "MongoDB Atlas Vector Store Insert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI (ingest)": {
+      "ai_embedding": [
+        [
+          {
+            "node": "MongoDB Atlas Vector Store Insert",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "MongoDB Atlas Vector Store Insert",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "RAG AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "RAG AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MongoDB Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "RAG AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Documents": {
+      "ai_tool": [
+        [
+          {
+            "node": "RAG AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Documents": {
+      "ai_tool": [
+        [
+          {
+            "node": "RAG AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get File Contents": {
+      "ai_tool": [
+        [
+          {
+            "node": "RAG AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Document Rows": {
+      "ai_tool": [
+        [
+          {
+            "node": "RAG AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI (agent)": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Search Documents",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Row Records1": {
+      "main": [
+        [
+          {
+            "node": "Insert Table Rows1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1c1ae653-714f-4cb7-928e-242fe8761ee4",
+  "meta": {
+    "templateId": "10157",
+    "templateCredsSetupCompleted": true,
+    "instanceId": "57441320b70178d806e96b762a15bb75202665623bb949270cccba67ddc8527d"
+  },
+  "nodeGroups": [],
+  "id": "ovmzIxkzFu9ksLbH",
+  "tags": []
+}
