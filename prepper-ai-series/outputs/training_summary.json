@@ -1,0 +1,15 @@
+{
+  "base_model": "unsloth/Qwen3-8B",
+  "rank": 16,
+  "lr": 0.0002,
+  "epochs": 3.0,
+  "dry_run": false,
+  "metrics": {
+    "train_runtime": 991.907,
+    "train_samples_per_second": 4.137,
+    "train_steps_per_second": 0.26,
+    "total_flos": 4.670149482350592e+16,
+    "train_loss": 1.0402915410755216,
+    "epoch": 3.0
+  }
+}
