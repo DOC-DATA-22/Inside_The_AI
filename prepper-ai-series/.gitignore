@@ -1,0 +1,5 @@
+outputs/prepper-*
+sources/
+llama.cpp*
+generated_*.jsonl
+rejected.jsonl

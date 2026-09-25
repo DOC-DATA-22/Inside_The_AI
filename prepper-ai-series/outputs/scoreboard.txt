@@ -1,0 +1,26 @@
+================================================================
+SCOREBOARD  (151 held-out questions, graded 1-5 by a local judge)
+================================================================
+                           BASE Qwen3-8B        PREPPER AI
+average grade                       4.41              4.71
+graded 4 or 5                        89%               95%
+graded 1 or 2                        10%                5%
+key-fact overlap                     36%               33%
+avg answer length                 181 w             74 w
+----------------------------------------------------------------
+by topic (average grade, base -> prepper):
+  evacuation_planning    4.90 ->  4.90   (n=10)
+  fire                   3.67 ->  4.78   (n=9)
+  first_aid              4.65 ->  4.95   (n=20)
+  food                   3.95 ->  4.50   (n=22)
+  general                5.00 ->  3.67   (n=3)
+  navigation_signal      4.50 ->  4.75   (n=12)
+  power_solar            4.25 ->  4.75   (n=4)
+  shelter                4.45 ->  4.82   (n=11)
+  tools_improvised       3.38 ->  4.12   (n=8)
+  water                  4.54 ->  4.68   (n=28)
+  water_survival         4.43 ->  4.57   (n=7)
+  weather                4.94 ->  5.00   (n=17)
+----------------------------------------------------------------
+Prepper AI beat the base model on 40 questions, tied on 102, lost on 9.
+Finished in 39.5 minutes. Details in outputs/scores.jsonl
