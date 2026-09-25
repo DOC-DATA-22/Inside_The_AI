@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BLACKOUT | AI Prepper</title>
+<style>
+  :root{
+    --bg:#0F120E; --panel:#161B14; --panel-2:#1D2419; --line:#2B3426;
+    --khaki:#C9BE9A; --bone:#EDE9DF; --dim:#7F8A72; --olive:#5C6B48; --amber:#F2A93B;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--bone);
+    font-family:"Bahnschrift","Bahnschrift SemiCondensed","Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
+    font-size:17px;line-height:1.5}
+  body{display:grid;grid-template-columns:300px 1fr;height:100vh}
+  @media (max-width:860px){body{grid-template-columns:1fr}aside{display:none}}
+
+  aside{background:var(--panel);border-right:1px solid var(--line);display:grid;grid-template-rows:auto 1fr auto;min-height:0}
+  .mark{padding:28px 24px 20px;border-bottom:1px solid var(--line)}
+  .mark .word{font-family:"Bahnschrift Condensed","Bahnschrift","Segoe UI",sans-serif;font-weight:700;font-size:38px;letter-spacing:.06em;
+    line-height:1;color:var(--bone);display:flex;align-items:center;gap:12px}
+  .mark .word i{width:14px;height:14px;border:3px solid var(--amber);border-left:0;border-bottom:0;transform:rotate(45deg);margin-left:2px}
+  .mark .sub{margin:8px 0 0 2px;font-size:12px;font-weight:700;letter-spacing:.32em;color:var(--amber)}
+  .mark .tag{margin:10px 0 0;font-size:14px;color:var(--khaki);letter-spacing:.02em}
+  .ready{display:flex;align-items:center;gap:8px;margin-top:16px;font-size:13px;color:var(--dim)}
+  .ready i{width:9px;height:9px;border-radius:50%;background:#3C4436}
+  .ready.on i{background:var(--amber);box-shadow:0 0 10px rgba(242,169,59,.6)}
+  .ready.bad i{background:#B2402B}
+
+  nav{overflow:auto;padding:14px 12px 20px}
+  nav h2{font-size:12px;font-weight:600;color:var(--dim);letter-spacing:.14em;margin:16px 12px 6px;text-transform:uppercase}
+  nav h2:first-child{margin-top:4px}
+  .q{display:block;width:100%;text-align:left;background:transparent;border:0;border-left:2px solid transparent;color:var(--khaki);
+    font:inherit;font-size:14.5px;line-height:1.35;padding:8px 12px;border-radius:0 6px 6px 0;cursor:pointer}
+  .q:hover,.q:focus-visible{background:var(--panel-2);border-left-color:var(--amber);color:var(--bone);outline:none}
+  .foot{padding:14px 24px 18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--dim);line-height:1.4}
+
+  main{display:grid;grid-template-rows:1fr auto;min-height:0}
+  .thread{overflow:auto;padding:36px 44px 12px}
+  .col{max-width:780px;margin:0 auto}
+  .hero{padding:26px 0 10px;max-width:600px}
+  .hero h1{font-family:"Bahnschrift Condensed","Bahnschrift","Segoe UI",sans-serif;font-weight:700;font-size:44px;line-height:1.02;
+    letter-spacing:.01em;margin:0 0 16px;color:var(--bone)}
+  .hero p{margin:0 0 8px;color:var(--khaki);max-width:52ch}
+
+  .turn{margin:0 0 24px}
+  .you{display:flex;justify-content:flex-end}
+  .you .b{background:var(--khaki);color:#14170F;padding:12px 16px;border-radius:12px 12px 3px 12px;max-width:78%;white-space:pre-wrap;font-weight:500}
+  .ai .lbl{font-size:12px;letter-spacing:.14em;color:var(--amber);margin:0 0 6px;font-weight:600}
+  .ai .b{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--amber);padding:18px 22px;border-radius:0 10px 10px 0;color:var(--bone)}
+  .ai .b p{margin:0 0 10px}.ai .b p:last-child{margin:0}
+  .ai .b p.h{color:var(--amber);font-weight:700;font-size:14px;letter-spacing:.06em;text-transform:uppercase;margin:14px 0 6px}
+  .ai .b p.h:first-child{margin-top:0}
+  .ai .b ol,.ai .b ul{margin:6px 0 10px 22px;padding:0}
+  .ai .b li{margin:5px 0}
+  .ai .b li::marker{color:var(--amber);font-weight:700}
+  .ai .b strong{color:#fff}
+  .cursor::after{content:"\258C";color:var(--amber);animation:blink 1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  @media (prefers-reduced-motion:reduce){.cursor::after{animation:none}}
+  .err{border-left-color:#B2402B}
+  .err code{background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px}
+
+  .compose{padding:14px 44px 24px;border-top:1px solid var(--line);background:var(--bg)}
+  .compose form{max-width:780px;margin:0 auto;display:grid;grid-template-columns:1fr auto;gap:10px}
+  .compose textarea{font:inherit;resize:none;height:58px;padding:15px 16px;border:1px solid var(--line);border-radius:10px;
+    background:var(--panel);color:var(--bone);line-height:1.4}
+  .compose textarea::placeholder{color:var(--dim)}
+  .compose textarea:focus{outline:none;border-color:var(--amber)}
+  .compose button{font-family:"Bahnschrift Condensed","Bahnschrift","Segoe UI",sans-serif;font-weight:700;font-size:20px;letter-spacing:.08em;
+    padding:0 28px;border:0;border-radius:10px;background:var(--amber);color:#14170F;cursor:pointer}
+  .compose button:hover{background:#FFC05A}
+  .compose button:disabled{background:#3C4436;color:var(--dim);cursor:default}
+  .compose button:focus-visible{outline:3px solid var(--bone);outline-offset:2px}
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="mark">
+    <div class="word">BLACKOUT<i aria-hidden="true"></i></div>
+    <div class="sub">AI PREPPER</div>
+    <p class="tag">Works with the lights off.</p>
+    <div class="ready" id="ready"><i></i><span>Starting up</span></div>
+  </div>
+  <nav aria-label="Quick questions">
+    <h2>Water</h2>
+    <button class="q">The power has been out for three days and the only water is a muddy creek. Can my kids drink it?</button>
+    <button class="q">How do I make water safe to drink with only household bleach?</button>
+    <h2>Food</h2>
+    <button class="q">The power has been out for two days. Is the food in my freezer still safe?</button>
+    <button class="q">How much food should I store for a family of four for two weeks?</button>
+    <h2>Shelter and heat</h2>
+    <button class="q">We are snowed in with no heat and it is dropping below freezing tonight. How do I keep my family warm?</button>
+    <button class="q">Is it safe to run a generator in the garage with the door open?</button>
+    <h2>First aid</h2>
+    <button class="q">Someone has a deep cut and it will not stop bleeding. What do I do?</button>
+    <button class="q">What are the early signs of hypothermia in a child?</button>
+    <h2>Weather</h2>
+    <button class="q">A hurricane hits in twelve hours and we cannot evacuate. What do we do right now?</button>
+    <h2>Power</h2>
+    <button class="q">What do I need for a small solar setup that can charge phones and run a radio?</button>
+  </nav>
+  <div class="foot">Trained on public domain U.S. government guidance and the Army Survival Manual. It can be wrong about numbers. Get professional medical care when it is available.</div>
+</aside>
+
+<main>
+  <div class="thread" id="thread">
+    <div class="col" id="col">
+      <div class="hero" id="hero">
+        <h1>Tell it what is happening at your house.</h1>
+        <p>How long the power has been out, who is with you, what you have on hand. It answers like a neighbor who has done this before.</p>
+        <p>Pick a question on the left or type your own.</p>
+      </div>
+    </div>
+  </div>
+  <div class="compose">
+    <form id="form">
+      <textarea id="input" placeholder="What is going on, and what do you have to work with?" aria-label="Your question"></textarea>
+      <button id="send" type="submit">ASK</button>
+    </form>
+  </div>
+</main>
+
+<script>
+const OLLAMA = "http://localhost:11434";
+const MODEL  = "prepper-ai";
+const history = [];
+const $ = (id) => document.getElementById(id);
+const thread = $("thread"), col = $("col"), input = $("input"), send = $("send"), form = $("form");
+
+async function checkModel(){
+  const r = $("ready");
+  try{
+    const res = await fetch(OLLAMA + "/api/tags", {cache:"no-store"});
+    const tags = await res.json();
+    const found = (tags.models||[]).some(m => (m.name||"").startsWith(MODEL));
+    r.className = "ready " + (found ? "on" : "bad");
+    r.querySelector("span").textContent = found ? "Ready" : "Model not found";
+  }catch(e){
+    r.className = "ready bad";
+    r.querySelector("span").textContent = "Ollama is not running";
+  }
+}
+checkModel(); setInterval(checkModel, 5000);
+
+function render(text){
+  const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  const lines = esc(text).split("\n");
+  let html = "", list = null;
+  const flush = () => { if(list){ html += `</${list}>`; list = null; } };
+  for(const raw of lines){
+    const line = raw.trim();
+    const head = line.match(/^(#{1,6})\s+(.*)/);
+    const num = line.match(/^(\d+)[.)]\s+(.*)/), bul = line.match(/^[-*\u2022]\s+(.*)/);
+    if(head){ flush(); html += `<p class="h">${head[2]}</p>`; }
+    else if(num){ if(list!=="ol"){flush(); html+="<ol>"; list="ol";} html += `<li>${num[2]}</li>`; }
+    else if(bul){ if(list!=="ul"){flush(); html+="<ul>"; list="ul";} html += `<li>${bul[1]}</li>`; }
+    else if(line===""){ flush(); }
+    else { flush(); html += `<p>${line}</p>`; }
+  }
+  flush();
+  return html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+}
+
+function addTurn(role, text){
+  $("hero")?.remove();
+  const t = document.createElement("div");
+  t.className = "turn " + (role === "user" ? "you" : "ai");
+  t.innerHTML = role === "user" ? `<div class="b"></div>` : `<div class="lbl">BLACKOUT</div><div class="b cursor"></div>`;
+  const b = t.querySelector(".b");
+  if(role === "user") b.textContent = text; else b.innerHTML = render(text);
+  col.appendChild(t);
+  thread.scrollTop = thread.scrollHeight;
+  return b;
+}
+
+async function ask(q){
+  q = q.trim(); if(!q) return;
+  input.value = ""; send.disabled = true;
+  addTurn("user", q);
+  history.push({role:"user", content:q});
+  const box = addTurn("assistant", "");
+  let full = "";
+  try{
+    const r = await fetch(OLLAMA + "/api/chat", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({model: MODEL, messages: history, stream: true, think: false, options:{temperature:0.3, top_p:0.9}})
+    });
+    if(!r.ok) throw new Error(`Ollama answered ${r.status}. Create the model with: ollama create prepper-ai -q q4_K_M -f Modelfile`);
+    const reader = r.body.getReader(), dec = new TextDecoder();
+    let buf = "";
+    while(true){
+      const {value, done} = await reader.read(); if(done) break;
+      buf += dec.decode(value, {stream:true});
+      let nl;
+      while((nl = buf.indexOf("\n")) >= 0){
+        const line = buf.slice(0, nl).trim(); buf = buf.slice(nl+1);
+        if(!line) continue;
+        const j = JSON.parse(line);
+        if(j.message && j.message.content){ full += j.message.content; box.innerHTML = render(full); thread.scrollTop = thread.scrollHeight; }
+      }
+    }
+    history.push({role:"assistant", content: full});
+  }catch(e){
+    box.classList.add("err");
+    box.innerHTML = `<p>Could not reach the model.</p><p>${e.message.replace(/</g,"&lt;")}</p><p>Start Ollama, then reload this page. Run <code>ollama list</code> and make sure <code>prepper-ai</code> is there.</p>`;
+  }finally{
+    box.classList.remove("cursor"); send.disabled = false; input.focus();
+  }
+}
+
+form.addEventListener("submit", e => { e.preventDefault(); ask(input.value); });
+input.addEventListener("keydown", e => { if(e.key === "Enter" && !e.shiftKey){ e.preventDefault(); form.requestSubmit(); } });
+document.querySelectorAll(".q").forEach(c => c.addEventListener("click", () => ask(c.textContent)));
+input.focus();
+</script>
+</body>
+</html>
